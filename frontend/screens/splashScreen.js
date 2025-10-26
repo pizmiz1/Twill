@@ -17,6 +17,9 @@ const SplashScreen = () => {
     };
 
     const load = async () => {
+      // TESTING
+      AsyncStorage.clear();
+
       const FirstUseJSON = await AsyncStorage.getItem("FirstUse");
       const FirstUseParsed = FirstUseJSON != null ? JSON.parse(FirstUseJSON) : null;
 
@@ -25,7 +28,7 @@ const SplashScreen = () => {
 
         navigation.navigate("Disclaimer");
       } else {
-        console.log("Not First Use!");
+        navigation.navigate("Home");
       }
     };
 
