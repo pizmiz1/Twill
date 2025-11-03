@@ -3,6 +3,7 @@ import colors from "../constants/colors";
 import Button from "../components/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { StatusBar } from "expo-status-bar";
 
 const DisclaimerScreen = () => {
   const navigation = useNavigation();
@@ -21,13 +22,15 @@ const DisclaimerScreen = () => {
         backgroundColor: colors.secondary,
       }}
     >
+      <StatusBar style="light" />
       <Image style={{ width: "0%", height: "35%", aspectRatio: 1, marginTop: "15%" }} source={require("./../assets/Info.png")}></Image>
       <Text
         style={{
-          fontSize: 40,
+          fontSize: 50,
           fontWeight: "bold",
           color: "white",
           marginTop: "20%",
+          fontFamily: "Main-Font",
         }}
       >
         Welcome!

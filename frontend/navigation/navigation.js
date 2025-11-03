@@ -1,6 +1,5 @@
 import { createStaticNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { StatusBar } from "expo-status-bar";
 
 // screens
 import SplashScreen from "../screens/splashScreen";
@@ -23,11 +22,7 @@ const AppNav = () => {
 
   const Navigation = createStaticNavigation(Stack);
 
-  return (
-    <Navigation>
-      <StatusBar style="light" />
-    </Navigation>
-  );
+  return <Navigation />;
 };
 
 export default AppNav;

@@ -12,6 +12,7 @@
     },
     "android": {
       "edgeToEdgeEnabled": true
-    }
+    },
+    "plugins": [["expo-font"]]
   }
 }

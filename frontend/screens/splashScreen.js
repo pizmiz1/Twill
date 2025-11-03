@@ -3,10 +3,16 @@ import { useRef, useEffect } from "react";
 import colors from "./../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StatusBar } from "expo-status-bar";
+import { useFonts } from "expo-font";
 
 const SplashScreen = () => {
   const navigation = useNavigation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const [loaded, error] = useFonts({
+    "Main-Font": require("./../assets/El_Messiri.ttf"),
+  });
 
   useEffect(() => {
     const setupInitialAsyncStructure = async () => {
@@ -32,8 +38,12 @@ const SplashScreen = () => {
       }
     };
 
+    if (!loaded) {
+      return;
+    }
+
     load();
-  }, []);
+  }, [loaded]);
 
   Animated.loop(
     Animated.sequence([
@@ -57,6 +67,7 @@ const SplashScreen = () => {
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary }}>
+      <StatusBar style="light" />
       <Animated.Image style={{ width: "0%", height: "35%", aspectRatio: 1, marginBottom: "10%", transform: [{ scale: scaleAnim }] }} source={require("./../assets/logo-clear.png")}></Animated.Image>
     </View>
   );
