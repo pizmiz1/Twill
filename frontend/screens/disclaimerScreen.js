@@ -1,6 +1,6 @@
 import { View, Text, Image } from "react-native";
 import colors from "../constants/colors";
-import Button from "../components/button";
+import Button from "../components/shared/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
@@ -31,6 +31,9 @@ const DisclaimerScreen = () => {
           color: "white",
           marginTop: "20%",
           fontFamily: "Main-Font",
+          fontStyle: "italic",
+          width: "100%",
+          textAlign: "center",
         }}
       >
         Welcome!
@@ -39,7 +42,7 @@ const DisclaimerScreen = () => {
         style={{
           width: "90%",
           marginTop: "3%",
-          color: colors.grey,
+          color: colors.light_grey,
           textAlign: "center",
         }}
       >

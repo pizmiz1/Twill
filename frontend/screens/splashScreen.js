@@ -11,7 +11,7 @@ const SplashScreen = () => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   const [loaded, error] = useFonts({
-    "Main-Font": require("./../assets/El_Messiri.ttf"),
+    "Main-Font": require("./../assets/Helvetica.ttf"),
   });
 
   useEffect(() => {

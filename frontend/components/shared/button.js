@@ -1,23 +1,25 @@
 import { Text, TouchableOpacity } from "react-native";
-import colors from "../constants/colors";
+import colors from "../../constants/colors";
 
-const Module = ({ style, label, onPress, color = colors.primary, size = 150 }) => {
+const Button = ({ style, label, onPress, color = colors.primary, size = 150, disabled = false }) => {
   return (
     <TouchableOpacity
       style={{
-        ...style,
         backgroundColor: color,
         width: size,
-        height: size,
-        borderRadius: 15,
+        height: size / 2.9,
+        borderRadius: 200,
         alignItems: "center",
         justifyContent: "center",
+        opacity: disabled ? 0.4 : 1,
+        ...style,
       }}
       onPress={onPress}
+      disabled={disabled}
     >
       <Text style={{ fontWeight: "bold", color: "white" }}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
-export default Module;
+export default Button;
