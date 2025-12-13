@@ -1,7 +1,16 @@
-import { Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, ViewStyle } from "react-native";
 import colors from "../../constants/colors";
 
-const Button = ({ style, label, onPress, color = colors.primary, size = 150, disabled = false }) => {
+interface ButtonProps {
+  style?: ViewStyle;
+  label: string;
+  onPress: () => void;
+  color?: string;
+  size?: number;
+  disabled?: boolean;
+}
+
+const Button = ({ style, label, onPress, color = colors.primary, size = 150, disabled = false }: ButtonProps) => {
   return (
     <TouchableOpacity
       style={{

@@ -1,31 +1,33 @@
-import { LayoutAnimation, Text, TouchableOpacity, View } from "react-native";
-import { useContext } from "react";
+import { LayoutAnimation, TouchableOpacity, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import colors from "../../constants/colors";
-import GlobalContext from "../../store/globalContext";
 
-const Edit = () => {
-  const { globalData, updateHomeEditing, updateHomeAdding } = useContext(GlobalContext);
+interface EditProps {
+  editing: boolean;
+  setEditing: (val: boolean) => void;
+  setAdding: (val: boolean) => void;
+}
 
+const Edit = ({ editing, setEditing, setAdding }: EditProps) => {
   const onEditPress = () => {
     LayoutAnimation.configureNext(LayoutAnimation.create(200, LayoutAnimation.Types.linear, LayoutAnimation.Properties.scaleXY));
 
-    updateHomeEditing(true);
+    setEditing(true);
   };
 
   const onAddPress = () => {
-    updateHomeAdding(true);
+    setAdding(true);
   };
 
   const onSavePress = () => {
     LayoutAnimation.configureNext(LayoutAnimation.create(200, LayoutAnimation.Types.linear, LayoutAnimation.Properties.scaleXY));
 
-    updateHomeEditing(false);
+    setEditing(false);
   };
 
   return (
     <View style={{ alignItems: "flex-end" }}>
-      {globalData.homeEditing ? (
+      {editing ? (
         <View style={{ flexDirection: "row", gap: 10 }}>
           <TouchableOpacity onPress={onAddPress}>
             <MaterialIcons name="add" size={34} color={colors.light_primary} />

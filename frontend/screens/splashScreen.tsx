@@ -1,12 +1,17 @@
-import { Image, Animated, View } from "react-native";
+import { Animated, View } from "react-native";
 import { useRef, useEffect } from "react";
 import colors from "./../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
+import asyncKeys from "../constants/asyncKeys";
+import routeNames from "../constants/routeNames";
+import { useGlobalContext } from "../store/globalContext";
 
 const SplashScreen = () => {
+  const { updateModules } = useGlobalContext();
+
   const navigation = useNavigation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -15,26 +20,39 @@ const SplashScreen = () => {
   });
 
   useEffect(() => {
+    const loadGlobalState = async () => {
+      // Get Data
+      const asyncData = await AsyncStorage.getItem(asyncKeys.modules);
+      let existingModules = JSON.parse(asyncData!);
+
+      // Update Global State
+      updateModules(existingModules);
+    };
+
     const setupInitialAsyncStructure = async () => {
       AsyncStorage.clear();
 
       // Storage Items
-      //await AsyncStorage.setItem("FirstUse", JSON.stringify([]));
+      await AsyncStorage.setItem(asyncKeys.modules, JSON.stringify([]));
+
+      await loadGlobalState();
     };
 
     const load = async () => {
       // TESTING
       AsyncStorage.clear();
 
-      const FirstUseJSON = await AsyncStorage.getItem("FirstUse");
+      const FirstUseJSON = await AsyncStorage.getItem(asyncKeys.firstUse);
       const FirstUseParsed = FirstUseJSON != null ? JSON.parse(FirstUseJSON) : null;
 
       if (FirstUseParsed === null) {
-        setupInitialAsyncStructure();
+        await setupInitialAsyncStructure();
 
-        navigation.navigate("Disclaimer");
+        navigation.navigate(routeNames.disclaimer as never);
       } else {
-        navigation.navigate("Home");
+        await loadGlobalState();
+
+        navigation.navigate(routeNames.home as never);
       }
     };
 

@@ -2,7 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { Animated, Pressable, Text } from "react-native";
 import colors from "../../constants/colors";
 
-const Day = ({ label, size, baseColor, onPress, reset }) => {
+interface DayProps {
+  label: string;
+  size: number;
+  baseColor: string;
+  onPress: () => void;
+  reset: boolean;
+}
+
+const Day = ({ label, size, baseColor, onPress, reset }: DayProps) => {
   const [active, setActive] = useState(false);
 
   const animVal = useRef(new Animated.Value(0)).current;

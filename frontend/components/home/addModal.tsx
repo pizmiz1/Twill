@@ -1,24 +1,37 @@
-import { useContext, useEffect, useState } from "react";
+import { ComponentProps, useContext, useEffect, useState } from "react";
 import { FlatList, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
-import GlobalContext from "../../store/globalContext";
+import { useGlobalContext } from "../../store/globalContext";
 import colors from "../../constants/colors";
 import Input from "../shared/input";
 import { MaterialIcons } from "@expo/vector-icons";
 import Button from "../shared/button";
 import Day from "./day";
+import uuid from "react-native-uuid";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import asyncKeys from "../../constants/asyncKeys";
+import { GlobalContextType } from "../../types/globalContextType";
+import { DaysType } from "../../types/daysType";
+import { ModuleType } from "../../types/moduleType";
 
-const AddModal = () => {
-  const { globalData, updateHomeAdding } = useContext(GlobalContext);
+const initialDays: DaysType = {
+  mon: false,
+  tues: false,
+  wed: false,
+  thur: false,
+  fri: false,
+  sat: false,
+  sun: false,
+};
 
-  const [days, setDays] = useState({
-    mon: false,
-    tues: false,
-    wed: false,
-    thur: false,
-    fri: false,
-    sat: false,
-    sun: false,
-  });
+interface AddModalProps {
+  visible: boolean;
+  setVisible: () => void;
+}
+
+const AddModal = ({ visible, setVisible }: AddModalProps) => {
+  const { updateModules }: GlobalContextType = useGlobalContext();
+
+  const [days, setDays] = useState(initialDays);
   const [resetInput, setResetInput] = useState(false);
   const [resetDay, setResetDay] = useState(false);
   const [name, setName] = useState("");
@@ -51,7 +64,7 @@ const AddModal = () => {
     "api",
   ];
 
-  const mapDayToLabel = (dayKey) => {
+  const mapDayToLabel = (dayKey: string) => {
     const dayKeys = Object.keys(days);
 
     switch (dayKey) {
@@ -74,10 +87,10 @@ const AddModal = () => {
     }
   };
 
-  const toggleDay = (dayKey) => {
+  const toggleDay = (dayKey: string) => {
     setDays((prev) => ({
       ...prev,
-      [dayKey]: !prev[dayKey],
+      [dayKey]: !prev[dayKey as keyof typeof days],
     }));
   };
 
@@ -86,21 +99,33 @@ const AddModal = () => {
     setResetInput(!resetInput);
     setName("");
     setIcon("");
-    Object.keys(days).forEach((key) => {
-      days[key] = false;
-    });
+    setDays(initialDays);
   };
 
   const closeModal = () => {
     resetState();
-    updateHomeAdding(false);
+    setVisible();
   };
 
-  const savePress = () => {
-    console.log("NOT IMPLEMENTED YET");
+  const savePress = async () => {
+    const newModule: ModuleType = {
+      id: uuid.v4(),
+      name: name,
+      icon: icon as ComponentProps<typeof MaterialIcons>["name"],
+      days: days,
+    };
+
+    const asyncData = await AsyncStorage.getItem(asyncKeys.modules);
+    let existingModules = JSON.parse(asyncData!);
+    existingModules.push(newModule);
+    await AsyncStorage.setItem(asyncKeys.modules, JSON.stringify(existingModules));
+
+    updateModules(existingModules);
+
+    closeModal();
   };
 
-  const renderIconItem = ({ item }) => (
+  const renderIconItem = ({ item }: { item: string }) => (
     <Pressable
       onPress={() => setIcon(item)}
       style={({ pressed }) => [
@@ -116,12 +141,12 @@ const AddModal = () => {
         },
       ]}
     >
-      <MaterialIcons name={item} size={30} color="#000" />
+      <MaterialIcons name={item as ComponentProps<typeof MaterialIcons>["name"]} size={30} color="#000" />
     </Pressable>
   );
 
   return (
-    <Modal visible={globalData.homeAdding} animationType="slide" presentationStyle="pageSheet" onRequestClose={closeModal}>
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={closeModal}>
       <View style={{ flex: 1 }}>
         <View
           style={{
@@ -131,7 +156,7 @@ const AddModal = () => {
             justifyContent: "flex-start",
           }}
         >
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
             <MaterialIcons name="close" size={24} color={colors.light_secondary} style={{ paddingVertical: "3%", paddingHorizontal: "1%" }} />
             <Text style={{ color: "white", fontSize: 35, fontFamily: "Main-Font", fontStyle: "italic", textAlign: "center" }}>New Module</Text>
             <TouchableOpacity onPress={closeModal} style={{ paddingVertical: "3%", paddingHorizontal: "1%" }}>
@@ -139,8 +164,7 @@ const AddModal = () => {
             </TouchableOpacity>
           </View>
 
-          <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "500", fontSize: 20, marginTop: 20 }}>Name</Text>
-          <Input label="Name" onChangeText={setName} style={{ marginTop: 5 }} reset={resetInput} baseColor={colors.light_secondary} />
+          <Input label="Name" onChangeText={setName} style={{ marginTop: 5 }} reset={resetInput} baseColor={colors.light_secondary} limit={15} />
 
           <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "500", fontSize: 20, marginTop: 25 }}>Icon</Text>
           <View style={{ marginTop: 5, height: 210 }}>

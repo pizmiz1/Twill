@@ -4,14 +4,16 @@ import Button from "../components/shared/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
+import asyncKeys from "../constants/asyncKeys";
+import routeNames from "../constants/routeNames";
 
 const DisclaimerScreen = () => {
   const navigation = useNavigation();
 
   const continuePress = async () => {
     const firstUseJSON = JSON.stringify(false);
-    await AsyncStorage.setItem("FirstUse", firstUseJSON);
-    navigation.navigate("Home");
+    await AsyncStorage.setItem(asyncKeys.firstUse, firstUseJSON);
+    navigation.navigate(routeNames.home as never);
   };
 
   return (
@@ -42,7 +44,7 @@ const DisclaimerScreen = () => {
         style={{
           width: "90%",
           marginTop: "3%",
-          color: colors.light_grey,
+          color: colors.lighter_grey,
           textAlign: "center",
         }}
       >

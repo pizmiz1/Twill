@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SplashScreen from "../screens/splashScreen";
 import DisclaimerScreen from "../screens/disclaimerScreen";
 import HomeScreen from "../screens/homeScreen";
+import routeNames from "../constants/routeNames";
 
 const AppNav = () => {
   const Stack = createNativeStackNavigator({
@@ -12,7 +13,7 @@ const AppNav = () => {
       headerShown: false,
       gestureEnabled: false,
     },
-    initialRouteName: "Splash",
+    initialRouteName: routeNames.splash,
     screens: {
       Splash: SplashScreen,
       Disclaimer: DisclaimerScreen,
