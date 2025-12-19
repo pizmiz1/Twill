@@ -8,6 +8,10 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+ips.tsx
+
+# Node/Express
+.env
 
 # Native
 .kotlin/
@@ -39,3 +43,5 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+google_client_info.txt
