@@ -6,6 +6,7 @@ import SplashScreen from "../screens/splashScreen";
 import DisclaimerScreen from "../screens/disclaimerScreen";
 import HomeScreen from "../screens/homeScreen";
 import routeNames from "../constants/routeNames";
+import AuthScreen from "../screens/authScreen";
 
 const AppNav = () => {
   const Stack = createNativeStackNavigator({
@@ -16,6 +17,7 @@ const AppNav = () => {
     initialRouteName: routeNames.splash,
     screens: {
       Splash: SplashScreen,
+      Auth: AuthScreen,
       Disclaimer: DisclaimerScreen,
       Home: HomeScreen,
     },

@@ -1,6 +1,6 @@
 const asyncKeys = {
   firstUse: "FirstUse",
-  modules: "Modules",
+  email: "Email",
 };
 
 export default asyncKeys;
