@@ -23,11 +23,9 @@ const AuthScreen = () => {
       return;
     }
 
-    const passkey = "aGmLL4TOZYlv*bxc";
-
     // Testing
-    const body: UserDto = { email: "ebritton12321@gmail.com" };
-    const API_URL = ips.Cle_Home_Proxy + "/auth/generateOtp";
+    const body: AccessDto = { email: "ebritton12321@gmail.com" };
+    const API_URL = ips.Render + "/auth/accessToken";
 
     const response = await fetch(API_URL, {
       method: "POST",
