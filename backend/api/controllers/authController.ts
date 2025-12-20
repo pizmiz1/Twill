@@ -38,13 +38,7 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
     const existing = await UserOtp.findOne({ email: req.body.email });
 
     if (existing) {
-      return res.status(409).json({ error: "OTP already exists" });
-    }
-
-    const user = await User.findOne({ email: req.body.email });
-
-    if (user) {
-      return res.status(409).json({ error: "User already authenticated" });
+      return res.status(409).json({ error: "Otp already exists" });
     }
 
     const otpCode = crypto.randomInt(100000, 1000000);
@@ -98,12 +92,6 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
       return res.status(404).json({ error: "Otp not found" });
     }
 
-    const user = await User.findOne({ email: req.body.email });
-
-    if (user) {
-      return res.status(401).json({ error: "Otp verification failed" });
-    }
-
     const isMatch = await bcrypt.compare(req.body.otp, userOtp.otp);
 
     if (!isMatch) {
@@ -123,6 +111,13 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
 
     const saltRounds = 10;
     const hasedPasskey = await bcrypt.hash(passkey, saltRounds);
+
+    const user = await User.findOne({ email: req.body.email });
+
+    if (user) {
+      await User.findByIdAndDelete(user._id);
+    }
+
     const newUser = new User({ email: req.body.email, passkey: hasedPasskey });
 
     await newUser.save();
