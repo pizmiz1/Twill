@@ -3,7 +3,7 @@ import { JsonDto } from "../../../shared/jsondto.js";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../types/express.js";
 
-export const authenticate = (req: Request, res: Response<JsonDto>, next: NextFunction) => {
+export const authenticate = (req: Request, res: Response<JsonDto<any>>, next: NextFunction) => {
   const authHeader = req.headers["authorization"];
 
   if (!authHeader) {

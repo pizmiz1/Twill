@@ -19,7 +19,7 @@ const authLimiter = rateLimit({
     return ipKeyGenerator(req.ip!);
   },
 
-  handler: (req: Request, res: Response<JsonDto>) => {
+  handler: (req: Request, res: Response<JsonDto<any>>) => {
     res.status(429).json({
       error: "Too many auth requests, please wait " + process.env.RL_MINS! + " mins",
     });

@@ -20,7 +20,7 @@ const mailgunAuth: Options = {
 
 const transporter = nodemailer.createTransport(mailgun(mailgunAuth));
 
-export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto>) => {
+export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<string>>) => {
   try {
     const user = await User.findOne({ email: req.body.email });
 
@@ -34,7 +34,7 @@ export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Resp
       return res.status(403).json({ error: "Invalid passkey" });
     }
 
-    const token = jwt.sign(req.body, process.env.JWT_SECRET_KEY!, { expiresIn: "24h" });
+    const token = jwt.sign(req.body, process.env.JWT_SECRET_KEY!, { expiresIn: "5s" });
 
     res.status(200).json({ data: token });
   } catch (err) {
@@ -43,7 +43,7 @@ export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Resp
   }
 };
 
-export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Response<JsonDto>) => {
+export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Response<JsonDto<{}>>) => {
   try {
     const existing = await UserOtp.findOne({ email: req.body.email });
 
@@ -86,7 +86,7 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
   }
 };
 
-export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<JsonDto>) => {
+export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<JsonDto<AccessDto>>) => {
   try {
     const userOtp = await UserOtp.findOne({ email: req.body.email });
 

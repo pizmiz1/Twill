@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { validationResult } from "express-validator";
 import { JsonDto } from "../../../shared/jsondto.js";
 
-export const validate = (req: Request, res: Response<JsonDto>, next: NextFunction) => {
+export const validate = (req: Request, res: Response<JsonDto<any>>, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const errorObjects = errors.array();
