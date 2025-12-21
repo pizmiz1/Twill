@@ -9,6 +9,16 @@ import jwt from "jsonwebtoken";
 import UserOtp from "../schema/userOtp.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import mailgun, { Options } from "nodemailer-mailgun-transport";
+
+const mailgunAuth: Options = {
+  auth: {
+    api_key: process.env.MAILGUN_API_KEY!,
+    domain: process.env.MAILGUN_DOMAIN,
+  },
+};
+
+const transporter = nodemailer.createTransport(mailgun(mailgunAuth));
 
 export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto>) => {
   try {
@@ -50,14 +60,6 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
 
     await userOtp.save();
 
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
     const mailOptions = {
       from: process.env.FROM_EMAIL,
       to: req.body.email,
@@ -70,7 +72,7 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
                 <span style="font-size: 32px; font-weight: bold; color: #234452; text-align: center; padding: 15px 0; letter-spacing: 5px; background-color: #ffffff; border: 1px solid #eee; border-radius: 4px; display: block; width: fit-content; margin: 15px auto;">
                   ${otpCode} 
                 </span>
-                <p>If you did not request this code, please ignore this email.</p>
+                <p>If you did not request sthis code, please ignore this email.</p>
               </div>
             `,
     };
