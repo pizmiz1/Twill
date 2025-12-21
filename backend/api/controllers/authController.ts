@@ -38,7 +38,7 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
     const existing = await UserOtp.findOne({ email: req.body.email });
 
     if (existing) {
-      return res.status(409).json({ error: "Otp already exists" });
+      await UserOtp.findByIdAndDelete(existing._id);
     }
 
     const otpCode = crypto.randomInt(100000, 1000000);
