@@ -4,6 +4,7 @@ import { requestLogger } from "./api/middleware/logger.js";
 import mongoose from "mongoose";
 import authRoutes from "./api/routes/authRoutes.js";
 import cors from "cors";
+import moduleRoutes from "./api/routes/moduleRoutes.js";
 
 console.log("Starting Server");
 
@@ -20,6 +21,7 @@ app.use(requestLogger);
 
 // Routes
 app.use("/", authRoutes);
+app.use("/", moduleRoutes);
 app.get("/", (req, res) => {
   res.status(201).send("Twill server is healthy.");
 });

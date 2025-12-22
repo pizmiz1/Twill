@@ -46,13 +46,7 @@ const generateOtpValidators: ValidationChain[] = [body("email").normalizeEmail()
 
 const verifyOtpValidators: ValidationChain[] = [
   body("email").normalizeEmail().isEmail().withMessage("Must be a valid email address"),
-  body("otp")
-    .notEmpty()
-    .withMessage("OTP is required")
-    .isNumeric()
-    .withMessage("OTP must be a number")
-    .isLength({ min: 6, max: 6 })
-    .withMessage("OTP must be exactly 6 digits"),
+  body("otp").isNumeric().withMessage("OTP must be a number").isLength({ min: 6, max: 6 }).withMessage("OTP must be exactly 6 digits"),
 ];
 
 // Routes
