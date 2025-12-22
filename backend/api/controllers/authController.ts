@@ -34,7 +34,7 @@ export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Resp
       return res.status(403).json({ error: "Invalid passkey" });
     }
 
-    const token = jwt.sign(req.body, process.env.JWT_SECRET_KEY!, { expiresIn: "24h" });
+    const token = jwt.sign(req.body, process.env.JWT_SECRET_KEY!, { expiresIn: process.env.JWT_EXPIRES_IN! as any });
 
     res.status(200).json({ data: token });
   } catch (err) {
