@@ -1,8 +1,8 @@
 import express from "express";
-import { body, query, ValidationChain } from "express-validator";
+import { body, param, query, ValidationChain } from "express-validator";
 import { authenticate } from "../middleware/authentication.js";
 import { validate } from "../middleware/validation.js";
-import { get, post } from "../controllers/moduleController.js";
+import { deleteModule, get, post } from "../controllers/moduleController.js";
 
 // Validators
 const postValidator: ValidationChain[] = [
@@ -12,7 +12,27 @@ const postValidator: ValidationChain[] = [
   body("days.*").isBoolean().withMessage("Days data must be booleans"),
 ];
 
-const getValidator: ValidationChain[] = [query("id").optional().isString().withMessage("Search term must be a string").trim()];
+const getValidator: ValidationChain[] = [
+  query("id")
+    .optional()
+    .isString()
+    .withMessage("Id must be a string")
+    .trim()
+    .escape()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Id must be 24 characters"),
+];
+
+const deleteValidator: ValidationChain[] = [
+  param("id")
+    .optional()
+    .isString()
+    .withMessage("Id must be a string")
+    .trim()
+    .escape()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Id must be 24 characters"),
+];
 
 // Routes
 const moduleRoutes = express.Router();
@@ -20,5 +40,6 @@ const baseUrl = "/module";
 
 moduleRoutes.route(baseUrl).post(authenticate, postValidator, validate, post);
 moduleRoutes.route(baseUrl).get(authenticate, getValidator, validate, get);
+moduleRoutes.route(baseUrl + "/:id").delete(authenticate, deleteValidator, validate, deleteModule);
 
 export default moduleRoutes;

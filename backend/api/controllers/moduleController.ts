@@ -65,3 +65,21 @@ export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => 
     res.status(500).json({ error: "Server error" });
   }
 };
+
+export const deleteModule = async (req: Request, res: Response<JsonDto<any>>) => {
+  try {
+    const id = req.params.id;
+
+    const deleted = await Module.findByIdAndDelete(id);
+
+    if (!deleted) {
+      res.status(404).json({ error: "Module not found" });
+      return;
+    }
+
+    res.status(200).json({});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
