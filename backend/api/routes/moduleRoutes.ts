@@ -6,6 +6,14 @@ import { deleteModule, get, patch, post } from "../controllers/moduleController.
 
 // Validators
 const postPatchValidators: ValidationChain[] = [
+  body("id")
+    .optional()
+    .isString()
+    .withMessage("Id must be a string")
+    .trim()
+    .escape()
+    .isLength({ min: 24, max: 24 })
+    .withMessage("Id must be 24 characters"),
   body("name").isString().withMessage("Name must be a string").trim().escape(),
   body("icon").isString().withMessage("Icon must be a string").trim().escape(),
   body("days").isObject().withMessage("Days must be an object"),
