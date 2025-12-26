@@ -2,10 +2,10 @@ import express from "express";
 import { body, param, query, ValidationChain } from "express-validator";
 import { authenticate } from "../middleware/authentication.js";
 import { validate } from "../middleware/validation.js";
-import { deleteModule, get, post } from "../controllers/moduleController.js";
+import { deleteModule, get, patch, post } from "../controllers/moduleController.js";
 
 // Validators
-const postValidator: ValidationChain[] = [
+const postPatchValidators: ValidationChain[] = [
   body("name").isString().withMessage("Name must be a string").trim().escape(),
   body("icon").isString().withMessage("Icon must be a string").trim().escape(),
   body("days").isObject().withMessage("Days must be an object"),
@@ -38,7 +38,8 @@ const deleteValidator: ValidationChain[] = [
 const moduleRoutes = express.Router();
 const baseUrl = "/module";
 
-moduleRoutes.route(baseUrl).post(authenticate, postValidator, validate, post);
+moduleRoutes.route(baseUrl).post(authenticate, postPatchValidators, validate, post);
+moduleRoutes.route(baseUrl).patch(authenticate, postPatchValidators, validate, patch);
 moduleRoutes.route(baseUrl).get(authenticate, getValidator, validate, get);
 moduleRoutes.route(baseUrl + "/:id").delete(authenticate, deleteValidator, validate, deleteModule);
 

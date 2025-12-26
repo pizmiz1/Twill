@@ -25,6 +25,29 @@ export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDt
   }
 };
 
+export const patch = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDto<ModuleDto>>) => {
+  try {
+    const updated = await Module.findByIdAndUpdate(req.body.id, req.body, { new: true });
+
+    if (!updated) {
+      res.status(404).json({ error: "Module not found" });
+      return;
+    }
+
+    const dto: ModuleDto = {
+      id: updated._id.toString(),
+      name: updated.name,
+      icon: updated.icon,
+      days: updated.days,
+    };
+
+    res.status(200).json({ data: dto });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => {
   try {
     const id = req.query.id;
