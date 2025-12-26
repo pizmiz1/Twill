@@ -1,14 +1,17 @@
 import mongoose from "mongoose";
 
-const daysSchema = new mongoose.Schema({
-  mon: { type: Boolean, required: true },
-  tues: { type: Boolean, required: true },
-  wed: { type: Boolean, required: true },
-  thur: { type: Boolean, required: true },
-  fri: { type: Boolean, required: true },
-  sat: { type: Boolean, required: true },
-  sun: { type: Boolean, required: true },
-});
+const daysSchema = new mongoose.Schema(
+  {
+    mon: { type: Boolean, required: true },
+    tues: { type: Boolean, required: true },
+    wed: { type: Boolean, required: true },
+    thur: { type: Boolean, required: true },
+    fri: { type: Boolean, required: true },
+    sat: { type: Boolean, required: true },
+    sun: { type: Boolean, required: true },
+  },
+  { _id: false }
+);
 
 const moduleSchema = new mongoose.Schema({
   userEmail: { type: String, required: true },
