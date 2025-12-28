@@ -15,6 +15,7 @@ export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDt
       id: retModule._id.toString(),
       name: retModule.name,
       icon: retModule.icon,
+      color: retModule.color,
       days: retModule.days,
     };
 
@@ -38,6 +39,7 @@ export const patch = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonD
       id: updated._id.toString(),
       name: updated.name,
       icon: updated.icon,
+      color: updated.color,
       days: updated.days,
     };
 
@@ -64,6 +66,7 @@ export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => 
         id: module._id.toString(),
         name: module.name,
         icon: module.icon,
+        color: module.color,
         days: module.days,
       };
 
@@ -76,6 +79,7 @@ export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => 
           id: module._id.toString(),
           name: module.name,
           icon: module.icon,
+          color: module.color,
           days: module.days,
         };
         return ret;

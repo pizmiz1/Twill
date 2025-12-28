@@ -17,6 +17,7 @@ const moduleSchema = new mongoose.Schema({
   userEmail: { type: String, required: true },
   name: { type: String, required: true },
   icon: { type: String, required: true },
+  color: { type: String, required: true },
   days: { type: daysSchema, required: true },
 });
 
