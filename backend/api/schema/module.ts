@@ -18,22 +18,40 @@ const daysSchema = new mongoose.Schema<DaysDto>(
   { _id: false }
 );
 
-const exerciseSchema = new mongoose.Schema<ExerciseDto>({
-  name: { type: String, required: true },
-  completed: { type: Boolean, required: true },
-  text1: { type: String, required: true },
-  text2: { type: String },
-});
+const exerciseSchema = new mongoose.Schema<ExerciseDto>(
+  {
+    name: { type: String, required: true },
+    completed: { type: Boolean, required: true },
+    text1: { type: String, required: true },
+    text2: { type: String },
+  },
+  {
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id.toString();
+      },
+    },
+  }
+);
 
-const moduleSchema = new mongoose.Schema<ModuleDtoBackend>({
-  userEmail: { type: String, required: true },
-  name: { type: String, required: true },
-  icon: { type: String, required: true },
-  color: { type: String, required: true },
-  progress: { type: Number, required: true },
-  days: { type: daysSchema, required: true },
-  exercises: { type: [exerciseSchema], required: true },
-});
+const moduleSchema = new mongoose.Schema<ModuleDtoBackend>(
+  {
+    userEmail: { type: String, required: true },
+    name: { type: String, required: true },
+    icon: { type: String, required: true },
+    color: { type: String, required: true },
+    progress: { type: Number, required: true },
+    days: { type: daysSchema, required: true },
+    exercises: { type: [exerciseSchema], required: true },
+  },
+  {
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id.toString();
+      },
+    },
+  }
+);
 
 const Module = mongoose.model("Module", moduleSchema);
 

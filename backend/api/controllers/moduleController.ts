@@ -11,15 +11,7 @@ export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDt
 
     const retModule = await newModule.save();
 
-    const dto: ModuleDto = {
-      id: retModule._id.toString(),
-      name: retModule.name,
-      icon: retModule.icon,
-      color: retModule.color,
-      progress: retModule.progress,
-      days: retModule.days,
-      exercises: retModule.exercises,
-    };
+    const dto = retModule.toJSON();
 
     res.status(201).json({ data: dto });
   } catch (err) {
@@ -48,15 +40,7 @@ export const patch = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonD
       return;
     }
 
-    const dto: ModuleDto = {
-      id: updated._id.toString(),
-      name: updated.name,
-      icon: updated.icon,
-      color: updated.color,
-      progress: updated.progress,
-      days: updated.days,
-      exercises: updated.exercises,
-    };
+    const dto = updated.toJSON();
 
     res.status(200).json({ data: dto });
   } catch (err) {
@@ -77,31 +61,14 @@ export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => 
         return;
       }
 
-      const dto: ModuleDto = {
-        id: module._id.toString(),
-        name: module.name,
-        icon: module.icon,
-        color: module.color,
-        progress: module.progress,
-        days: module.days,
-        exercises: module.exercises,
-      };
+      const dto = module.toJSON();
 
       res.status(200).json({ data: [dto] });
     } else {
       const modules = await Module.find({ userEmail: req.user!.email });
 
       const dto = modules.map((module) => {
-        const ret: ModuleDto = {
-          id: module._id.toString(),
-          name: module.name,
-          icon: module.icon,
-          color: module.color,
-          progress: module.progress,
-          days: module.days,
-          exercises: module.exercises,
-        };
-        return ret;
+        return module.toJSON();
       });
 
       res.status(200).json({ data: dto });
