@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
+import { OtpDto } from "../../../shared/otpdto.js";
 
-const userOtpSchema = new mongoose.Schema({
+export interface OtpDtoBackend extends OtpDto {
+  createdAt: Date;
+}
+
+const userOtpSchema = new mongoose.Schema<OtpDtoBackend>({
   email: { type: String, required: true, unique: true },
   otp: { type: String, required: true, length: 6 },
   createdAt: { type: Date, default: Date.now, required: true },

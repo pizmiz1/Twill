@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
+import { DaysDto, ExerciseDto, ModuleDto } from "../../../shared/moduledto.js";
 
-const daysSchema = new mongoose.Schema(
+export interface ModuleDtoBackend extends ModuleDto {
+  userEmail: string;
+}
+
+const daysSchema = new mongoose.Schema<DaysDto>(
   {
     mon: { type: Boolean, required: true },
     tues: { type: Boolean, required: true },
@@ -13,12 +18,21 @@ const daysSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const moduleSchema = new mongoose.Schema({
+const exerciseSchema = new mongoose.Schema<ExerciseDto>({
+  name: { type: String, required: true },
+  completed: { type: Boolean, required: true },
+  text1: { type: String, required: true },
+  text2: { type: String },
+});
+
+const moduleSchema = new mongoose.Schema<ModuleDtoBackend>({
   userEmail: { type: String, required: true },
   name: { type: String, required: true },
   icon: { type: String, required: true },
   color: { type: String, required: true },
+  progress: { type: Number, required: true },
   days: { type: daysSchema, required: true },
+  exercises: { type: [exerciseSchema], required: true },
 });
 
 const Module = mongoose.model("Module", moduleSchema);

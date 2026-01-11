@@ -16,7 +16,9 @@ export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDt
       name: retModule.name,
       icon: retModule.icon,
       color: retModule.color,
+      progress: retModule.progress,
       days: retModule.days,
+      exercises: retModule.exercises,
     };
 
     res.status(201).json({ data: dto });
@@ -28,6 +30,17 @@ export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDt
 
 export const patch = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDto<ModuleDto>>) => {
   try {
+    let percentComplete;
+    const totalCount = req.body.exercises.length;
+    if (totalCount === 0) {
+      percentComplete = 0;
+    } else {
+      const completedCount = req.body.exercises.filter((exercise) => exercise.completed === true).length;
+      percentComplete = (completedCount / totalCount) * 100;
+    }
+
+    req.body.progress = percentComplete;
+
     const updated = await Module.findByIdAndUpdate(req.body.id, req.body, { new: true });
 
     if (!updated) {
@@ -40,7 +53,9 @@ export const patch = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonD
       name: updated.name,
       icon: updated.icon,
       color: updated.color,
+      progress: updated.progress,
       days: updated.days,
+      exercises: updated.exercises,
     };
 
     res.status(200).json({ data: dto });
@@ -67,7 +82,9 @@ export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => 
         name: module.name,
         icon: module.icon,
         color: module.color,
+        progress: module.progress,
         days: module.days,
+        exercises: module.exercises,
       };
 
       res.status(200).json({ data: [dto] });
@@ -80,7 +97,9 @@ export const get = async (req: Request, res: Response<JsonDto<ModuleDto[]>>) => 
           name: module.name,
           icon: module.icon,
           color: module.color,
+          progress: module.progress,
           days: module.days,
+          exercises: module.exercises,
         };
         return ret;
       });

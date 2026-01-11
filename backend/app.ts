@@ -6,6 +6,7 @@ import authRoutes from "./api/routes/authRoutes.js";
 import cors from "cors";
 import moduleRoutes from "./api/routes/moduleRoutes.js";
 import { JsonDto } from "../shared/jsondto.js";
+import { resetExercisesCron } from "./api/cron/resetExercises.js";
 
 console.log("Starting Server");
 
@@ -35,6 +36,8 @@ const run = async () => {
     await mongoose.connect(mongo_cs!);
 
     console.log("Success!");
+
+    resetExercisesCron();
 
     app.listen(port, () => {
       console.log("Listening on " + port + "...");
