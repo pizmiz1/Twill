@@ -33,6 +33,13 @@ export const patch = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonD
 
     req.body.progress = percentComplete;
 
+    if (req.body.exercises) {
+      req.body.exercises = req.body.exercises.map((ex: any) => ({
+        ...ex,
+        _id: ex.id,
+      }));
+    }
+
     const updated = await Module.findByIdAndUpdate(req.body.id, req.body, { new: true });
 
     if (!updated) {

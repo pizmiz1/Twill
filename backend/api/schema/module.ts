@@ -15,7 +15,7 @@ const daysSchema = new mongoose.Schema<DaysDto>(
     sat: { type: Boolean, required: true },
     sun: { type: Boolean, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const exerciseSchema = new mongoose.Schema<ExerciseDto>(
@@ -27,11 +27,14 @@ const exerciseSchema = new mongoose.Schema<ExerciseDto>(
   },
   {
     toJSON: {
-      transform: (doc, ret) => {
+      transform: (doc, ret: any) => {
         ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+        return ret;
       },
     },
-  }
+  },
 );
 
 const moduleSchema = new mongoose.Schema<ModuleDtoBackend>(
@@ -46,11 +49,14 @@ const moduleSchema = new mongoose.Schema<ModuleDtoBackend>(
   },
   {
     toJSON: {
-      transform: (doc, ret) => {
+      transform: (doc, ret: any) => {
         ret.id = ret._id.toString();
+        delete ret._id;
+        delete ret.__v;
+        return ret;
       },
     },
-  }
+  },
 );
 
 const Module = mongoose.model("Module", moduleSchema);
