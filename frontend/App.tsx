@@ -1,3 +1,4 @@
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AppNav from "./navigation/navigation";
 import GlobalProvider from "./store/globalProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -5,9 +6,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 const App = () => {
   return (
     <SafeAreaProvider>
-      <GlobalProvider>
-        <AppNav />
-      </GlobalProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <GlobalProvider>
+          <AppNav />
+        </GlobalProvider>
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   );
 };

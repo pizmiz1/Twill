@@ -7,6 +7,12 @@ const colors = {
   lighter_grey: "#afafafff",
   light_grey: "#929292ff",
   dark_grey: "#3f3942ff",
+  border_grey: "#ccc",
+  warning: "orangered",
+  primary_orange_compliment: "#D56855",
+  primary_orange_compliment_light: "#DD8172",
+  primary_blue_compliment: "#4169e1",
+  primary_blue_compliment_light: "#5381e4",
 };
 
 export default colors;

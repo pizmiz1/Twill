@@ -1,4 +1,4 @@
-export interface JsonDto {
-  data?: any;
+export interface JsonDto<T> {
+  data?: T;
   error?: string;
 }

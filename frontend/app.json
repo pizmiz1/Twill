@@ -13,6 +13,11 @@
     "android": {
       "edgeToEdgeEnabled": true
     },
-    "plugins": [["expo-font"]]
+    "plugins": [
+      [
+        "expo-font"
+      ],
+      "expo-asset"
+    ]
   }
 }

@@ -1,8 +1,9 @@
 const routeNames = {
-  splash: "Splash",
-  auth: "Auth",
-  disclaimer: "Disclaimer",
-  home: "Home",
+  splash: "Splash" as never,
+  signup: "Signup" as never,
+  module: "Module" as never,
+  daily: "Daily" as never,
+  moduleDetail: "ModuleDetail" as never,
 };
 
 export default routeNames;

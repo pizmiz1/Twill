@@ -1,17 +1,21 @@
-import { TextInput, Animated, Text, View, ViewStyle } from "react-native";
+import { TextInput, Animated, Text, View, ViewStyle, TouchableWithoutFeedback, Keyboard, KeyboardTypeOptions } from "react-native";
 import colors from "../../constants/colors";
 import { useEffect, useRef, useState } from "react";
 
 interface InputProps {
-  label: string;
-  baseColor: string;
+  label?: string;
+  placeholder?: string;
+  baseBorderColor: string;
   onChangeText: (val: string) => void;
   style?: ViewStyle;
   reset: boolean;
-  limit: number;
+  limit?: number;
+  keyboardType?: KeyboardTypeOptions;
+  disabled?: boolean;
+  startVal?: string;
 }
 
-const Input = ({ label, baseColor, onChangeText, style, reset, limit }: InputProps) => {
+const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset, limit, keyboardType, disabled, startVal }: InputProps) => {
   const [text, setText] = useState("");
 
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -25,9 +29,22 @@ const Input = ({ label, baseColor, onChangeText, style, reset, limit }: InputPro
     setText("");
   }, [reset]);
 
+  useEffect(() => {
+    if (!startVal) {
+      return;
+    }
+
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+    setText(startVal);
+  }, [startVal]);
+
   const borderColor = animatedValue.interpolate({
     inputRange: [0, 1],
-    outputRange: [baseColor, "white"],
+    outputRange: [baseBorderColor, "white"],
   });
 
   const onChangeTextLocal = (newText: string) => {
@@ -53,21 +70,24 @@ const Input = ({ label, baseColor, onChangeText, style, reset, limit }: InputPro
 
   return (
     <View style={{ ...style }}>
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: "2%", justifyContent: "space-between" }}>
-        <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "500", fontSize: 20 }}>{label}</Text>
-        <Text style={{ color: text.length > 0 ? "white" : colors.light_grey }}>
-          {text.length}/{limit}
-        </Text>
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 2, justifyContent: "space-between" }}>
+        {label && <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "500", fontSize: 20 }}>{label}</Text>}
+        {limit && (
+          <Text style={{ color: text.length > 0 ? "white" : colors.light_grey }}>
+            {text.length}/{limit}
+          </Text>
+        )}
       </View>
-      <Animated.View style={{ borderWidth: 1, borderColor: borderColor, borderRadius: 7, ...style }}>
+      <Animated.View style={{ borderWidth: disabled ? 0 : 1, borderColor: borderColor, borderRadius: 7, opacity: disabled ? 0.4 : 1 }}>
         <TextInput
           value={text}
           onChangeText={onChangeTextLocal}
-          style={{ padding: 10, borderRadius: 7, color: "white", backgroundColor: colors.dark_grey }}
-          placeholder={label}
+          style={{ height: 40, padding: 10, borderRadius: 7, color: "white", backgroundColor: colors.dark_grey }}
+          placeholder={placeholder ? placeholder : "Type here"}
           placeholderTextColor="#aaa"
           maxLength={limit}
-          autoCapitalize="characters"
+          keyboardType={keyboardType}
+          editable={!disabled}
         />
       </Animated.View>
     </View>
