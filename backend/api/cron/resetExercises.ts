@@ -18,7 +18,40 @@ export const resetExercisesCron = () => {
               progress: 0,
               "exercises.$[].completed": false,
             },
-          }
+          },
+        );
+
+        const daysArr = ["sun", "mon", "tues", "wed", "thur", "fri", "sat"];
+        const todayKey = daysArr[new Date().getDay()];
+
+        await Module.updateMany(
+          {
+            [`days.${todayKey}`]: true,
+            "exercises.altActive": { $exists: true },
+          },
+          [
+            {
+              $set: {
+                exercises: {
+                  $map: {
+                    input: "$exercises",
+                    as: "ex",
+                    in: {
+                      $mergeObjects: [
+                        "$$ex",
+                        {
+                          altActive: {
+                            $cond: [{ $eq: [{ $type: "$$ex.altActive" }, "missing"] }, "$$REMOVE", { $not: "$$ex.altActive" }],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          ],
+          { updatePipeline: true },
         );
 
         console.log("Reset exercises complete!");
@@ -29,6 +62,6 @@ export const resetExercisesCron = () => {
     },
     {
       timezone: "America/New_York",
-    }
+    },
   );
 };
