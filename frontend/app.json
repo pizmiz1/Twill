@@ -17,10 +17,15 @@
     "android": {
       "edgeToEdgeEnabled": true
     },
-    "plugins": [["expo-font"], "expo-asset"],
+    "plugins": [
+      [
+        "expo-font"
+      ],
+      "expo-asset"
+    ],
     "extra": {
       "eas": {
-        "projectId": "23d34b69-e566-4675-87cb-8bd80a3cdf79"
+        "projectId": "6b1f17ae-4a20-4f8a-b6e2-68a141d210d0"
       }
     }
   }
