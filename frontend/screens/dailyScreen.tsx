@@ -168,7 +168,7 @@ const DailyScreen = () => {
                   color: "white",
                   fontSize: 25,
                   fontFamily: "Main-Font",
-                  marginTop: 30,
+                  marginTop: 40,
                   marginBottom: 5,
                 }}
               >

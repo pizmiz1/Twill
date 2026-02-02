@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { opacityLayout } from "../../helpers/layouts";
 import { ExerciseDto } from "../../../shared/moduledto";
+import AltModal from "./altModal";
 
 interface ExerciseProps {
   exerciseId: string;
@@ -21,13 +22,15 @@ interface ExerciseProps {
 const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hideActive, active, deleteCallback }: ExerciseProps) => {
   const { modules, patchModule } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
-  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId);
+  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId)!;
 
+  const [altModalVisible, setAltModalVisible] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(exercise?.name);
-  const [text1, setText1] = useState(exercise?.text1);
-  const [text2, setText2] = useState(exercise?.text2);
+  const [name, setName] = useState(exercise.name);
+  const [text1, setText1] = useState(exercise.text1);
+  const [text2, setText2] = useState(exercise.text2);
+  const [swiped, setSwiped] = useState(false);
 
   const swipeableRef = useRef<Swipeable>(null);
 
@@ -50,15 +53,12 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   const updateExercise = async () => {
     setSaving(true);
 
-    const newExercise: ExerciseDto = {
-      id: exercise?.id,
-      name: name!,
-      text1: text1!,
-      text2: text2,
-      completed: exercise?.completed!,
-    };
+    let newExercise = exercise;
+    newExercise.name = name;
+    newExercise.text1 = text1;
+    newExercise.text2 = text2;
 
-    const index = module.exercises.findIndex((curr) => curr.id === exercise?.id);
+    const index = module.exercises.findIndex((curr) => curr.id === exercise.id);
     module.exercises[index] = newExercise;
 
     const success = await patchModule(module);
@@ -93,7 +93,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
           justifyContent: "flex-end",
           flexDirection: "row",
           gap: 10,
-          width: 90,
+          width: 140,
         }}
       >
         {saving ? (
@@ -104,6 +104,15 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
               <></>
             ) : (
               <>
+                <MaterialIconButton
+                  name={exercise.altName ? "do-not-disturb-on-total-silence" : "radio-button-unchecked"}
+                  color={colors.light_primary}
+                  size={34}
+                  onPress={() => {
+                    setAltModalVisible(true);
+                  }}
+                  style={{ padding: "1%" }}
+                />
                 <MaterialIconButton
                   name="edit"
                   color={colors.light_primary}
@@ -130,6 +139,8 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
       renderRightActions={rightAction}
       friction={2}
       onSwipeableOpenStartDrag={() => {
+        opacityLayout();
+        setSwiped(true);
         if (active) {
           Animated.timing(hideActive, {
             toValue: 0.5,
@@ -139,6 +150,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
         }
       }}
       onSwipeableClose={() => {
+        setSwiped(false);
         if (active && !editing) {
           Animated.timing(hideActive, {
             toValue: 0,
@@ -149,6 +161,15 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
       }}
       enabled={!saving && !editing}
     >
+      <AltModal
+        visible={altModalVisible}
+        setVisible={setAltModalVisible}
+        moduleId={moduleId}
+        exerciseId={exerciseId}
+        saveFinished={() => {
+          swipeableRef.current!.close();
+        }}
+      />
       <Animated.View style={{ flexDirection: "row", opacity: viewOpacity, overflow: "hidden" }}>
         <View>
           <View style={{ width: 49, alignItems: "center", zIndex: 0 }}>
@@ -168,59 +189,81 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 40 }} />
           </View>
         </View>
-        <View style={{ justifyContent: "center", flex: 1, gap: 7, marginLeft: 15 }}>
-          {editing ? (
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              style={{ color: "white", fontWeight: "bold", fontSize: 20 }}
-              placeholderTextColor="#6b6b6b"
-              placeholder="Name..."
-              editable={!saving}
-              autoFocus={true}
-            />
-          ) : (
-            <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }} numberOfLines={1}>
-              {exercise?.name}
-            </Text>
-          )}
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ flexDirection: "row", flex: 1, alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ justifyContent: "center", flex: 1, gap: 7, marginLeft: 15 }}>
             {editing ? (
               <TextInput
-                value={text1}
-                onChangeText={setText1}
-                style={{ color: colors.lightest_grey, width: "40%" }}
+                value={name}
+                onChangeText={setName}
+                style={{ color: "white", fontWeight: "bold", fontSize: 20 }}
                 placeholderTextColor="#6b6b6b"
-                placeholder="Text..."
+                placeholder="Name..."
                 editable={!saving}
+                autoFocus={true}
               />
             ) : (
-              <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
-                {exercise?.text1}
+              <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }} numberOfLines={1}>
+                {exercise.altActive ? exercise.altName : exercise.name}
               </Text>
             )}
-            {editing ? (
-              <>
-                <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 20, marginHorizontal: 20 }} />
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              {editing ? (
                 <TextInput
-                  value={text2}
-                  onChangeText={setText2}
-                  style={{ color: colors.lightest_grey, width: "30%" }}
+                  value={text1}
+                  onChangeText={setText1}
+                  style={{ color: colors.lightest_grey, width: "40%" }}
                   placeholderTextColor="#6b6b6b"
-                  placeholder="Optional..."
+                  placeholder="Text..."
                   editable={!saving}
                 />
-              </>
-            ) : (
-              exercise?.text2 && (
+              ) : (
+                <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
+                  {exercise.altActive ? exercise.altText1 : exercise.text1}
+                </Text>
+              )}
+              <View
+                style={{
+                  width: StyleSheet.hairlineWidth,
+                  backgroundColor: colors.border_grey,
+                  height: 20,
+                  marginHorizontal: 20,
+                  opacity: exercise.text2 || editing ? 1 : 0,
+                }}
+              />
+              {editing ? (
                 <>
-                  <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 20, marginHorizontal: 20 }} />
-                  <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
-                    {exercise.text2}
-                  </Text>
+                  <TextInput
+                    value={text2}
+                    onChangeText={setText2}
+                    style={{ color: colors.lightest_grey, width: "30%" }}
+                    placeholderTextColor="#6b6b6b"
+                    placeholder="Optional..."
+                    editable={!saving}
+                  />
                 </>
-              )
-            )}
+              ) : (
+                exercise.text2 && (
+                  <>
+                    <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
+                      {exercise.altActive ? exercise.altText2 : exercise.text2}
+                    </Text>
+                  </>
+                )
+              )}
+            </View>
+          </View>
+
+          <View
+            style={{
+              opacity: !swiped && exercise.altActive === true && !editing ? 1 : 0,
+              borderWidth: 1,
+              borderColor: colors.primary,
+              borderRadius: 20,
+              marginTop: 5,
+              backgroundColor: colors.primary,
+            }}
+          >
+            <Text style={{ color: "white", paddingHorizontal: 10, paddingVertical: 2 }}>Alt</Text>
           </View>
         </View>
         {editing && (

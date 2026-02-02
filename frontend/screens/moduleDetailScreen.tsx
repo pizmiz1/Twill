@@ -329,8 +329,9 @@ const ModuleDetailScreen = () => {
             fontStyle: "italic",
             fontWeight: "bold",
             opacity: blurActive ? 0 : 1,
-            width: "60%",
+            width: "80%",
           }}
+          numberOfLines={1}
         >
           {module.name}
         </Text>
@@ -357,11 +358,11 @@ const ModuleDetailScreen = () => {
           <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Restart</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ alignItems: "center", opacity: adding || module.progress === 100 ? 0 : 1 }}
+          style={{ alignItems: "center", opacity: adding || module.progress === 100 || module.exercises.length === 0 ? 0 : 1 }}
           onPress={() => {
             refreshOrFinish(false);
           }}
-          disabled={adding || module.progress === 100}
+          disabled={adding || module.progress === 100 || module.exercises.length === 0}
         >
           <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Finish</Text>
         </TouchableOpacity>
