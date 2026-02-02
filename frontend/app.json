@@ -1,24 +1,23 @@
 {
   "expo": {
-    "name": "Twill",
-    "slug": "Twill",
+    "name": "Regimotion",
+    "slug": "Regimotion",
     "version": "1.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.linedo.Regimotion",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "edgeToEdgeEnabled": true
     },
-    "plugins": [
-      [
-        "expo-font"
-      ],
-      "expo-asset"
-    ],
+    "plugins": [["expo-font"], "expo-asset"],
     "extra": {
       "eas": {
         "projectId": "23d34b69-e566-4675-87cb-8bd80a3cdf79"

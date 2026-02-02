@@ -63,7 +63,7 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
     const mailOptions = {
       from: process.env.FROM_EMAIL,
       to: req.body.email,
-      subject: "Twill OTP Code!",
+      subject: "Regimotion OTP Code!",
       html: `
               <div style="max-width: 600px; margin: 20px auto; padding: 20px; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
                 <h2>Email Verification</h2>

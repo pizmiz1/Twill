@@ -25,7 +25,7 @@ app.use(requestLogger);
 app.use("/", authRoutes);
 app.use("/", moduleRoutes);
 app.get("/", (req, res: Response<JsonDto<string>>) => {
-  res.status(200).json({ data: "Twill server is healthy." });
+  res.status(200).json({ data: "Regimotion server is healthy." });
 });
 
 // Run

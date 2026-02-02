@@ -1,2 +1,3 @@
-# Twill
+# Regimotion
+
 Daily Exercise Mobile App
