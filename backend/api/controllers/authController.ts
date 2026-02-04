@@ -51,7 +51,12 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
       await UserOtp.findByIdAndDelete(existing._id);
     }
 
-    const otpCode = crypto.randomInt(100000, 1000000);
+    // const otpCode = crypto.randomInt(100000, 1000000);
+    // For Apple Review
+    let otpCode = crypto.randomInt(100000, 1000000);
+    if (req.body.email === "test@test.com") {
+      otpCode = 843190;
+    }
 
     const saltRounds = 10;
     const hashedOtp = await bcrypt.hash(otpCode.toString(), saltRounds);
