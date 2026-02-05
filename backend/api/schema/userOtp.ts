@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { OtpDto } from "../../../shared/otpdto.js";
 
-export interface OtpDtoBackend extends OtpDto {
+interface OtpDtoBackend extends OtpDto {
   createdAt: Date;
 }
 

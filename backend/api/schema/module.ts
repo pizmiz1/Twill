@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { DaysDto, ExerciseDto, ModuleDto } from "../../../shared/moduledto.js";
 
-export interface ModuleDtoBackend extends ModuleDto {
+interface ModuleDtoBackend extends ModuleDto {
   userEmail: string;
 }
 

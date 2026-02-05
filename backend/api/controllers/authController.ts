@@ -22,15 +22,22 @@ const transporter = nodemailer.createTransport(mailgun(mailgunAuth));
 
 export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<string>>) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const users = await User.find({ email: req.body.email });
 
-    if (!user) {
+    if (users.length === 0) {
       return res.status(401).json({ error: "User not found" });
     }
 
-    const isMatch = await bcrypt.compare(req.body.passkey, user.passkey);
+    let match = false;
 
-    if (!isMatch) {
+    for (const user of users) {
+      match = await bcrypt.compare(req.body.passkey, user.passkey);
+      if (match) {
+        break;
+      }
+    }
+
+    if (!match) {
       return res.status(403).json({ error: "Invalid passkey" });
     }
 
@@ -51,12 +58,7 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
       await UserOtp.findByIdAndDelete(existing._id);
     }
 
-    // const otpCode = crypto.randomInt(100000, 1000000);
-    // For Apple Review
-    let otpCode = crypto.randomInt(100000, 1000000);
-    if (req.body.email === "test@test.com") {
-      otpCode = 843190;
-    }
+    const otpCode = crypto.randomInt(100000, 1000000);
 
     const saltRounds = 10;
     const hashedOtp = await bcrypt.hash(otpCode.toString(), saltRounds);
@@ -118,12 +120,6 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
 
     const saltRounds = 10;
     const hasedPasskey = await bcrypt.hash(passkey, saltRounds);
-
-    const user = await User.findOne({ email: req.body.email });
-
-    if (user) {
-      await User.findByIdAndDelete(user._id);
-    }
 
     const newUser = new User({ email: req.body.email, passkey: hasedPasskey });
 

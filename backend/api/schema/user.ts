@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import { UserDto } from "../../../shared/userdto.js";
 
-export interface UserDtoBackend extends UserDto {
-  userEmail: string;
+interface UserDtoBackend extends UserDto {
   passkey: string;
 }
 
