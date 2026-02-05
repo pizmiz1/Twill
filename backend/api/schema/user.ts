@@ -6,7 +6,7 @@ interface UserDtoBackend extends UserDto {
 }
 
 const userSchema = new mongoose.Schema<UserDtoBackend>({
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   passkey: { type: String, required: true, unique: true },
 });
 
