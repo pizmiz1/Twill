@@ -22,14 +22,14 @@ interface ExerciseProps {
 const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hideActive, active, deleteCallback }: ExerciseProps) => {
   const { modules, patchModule } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
-  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId)!;
+  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId);
 
   const [altModalVisible, setAltModalVisible] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(exercise.name);
-  const [text1, setText1] = useState(exercise.text1);
-  const [text2, setText2] = useState(exercise.text2);
+  const [name, setName] = useState(exercise?.name);
+  const [text1, setText1] = useState(exercise?.text1);
+  const [text2, setText2] = useState(exercise?.text2);
   const [swiped, setSwiped] = useState(false);
 
   const swipeableRef = useRef<Swipeable>(null);
@@ -53,12 +53,12 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   const updateExercise = async () => {
     setSaving(true);
 
-    let newExercise = exercise;
-    newExercise.name = name;
-    newExercise.text1 = text1;
+    let newExercise = exercise!;
+    newExercise.name = name!;
+    newExercise.text1 = text1!;
     newExercise.text2 = text2;
 
-    const index = module.exercises.findIndex((curr) => curr.id === exercise.id);
+    const index = module.exercises.findIndex((curr) => curr.id === exercise?.id);
     module.exercises[index] = newExercise;
 
     const success = await patchModule(module);
@@ -105,7 +105,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             ) : (
               <>
                 <MaterialIconButton
-                  name={exercise.altName ? "do-not-disturb-on-total-silence" : "radio-button-unchecked"}
+                  name={exercise?.altName ? "do-not-disturb-on-total-silence" : "radio-button-unchecked"}
                   color={colors.light_primary}
                   size={34}
                   onPress={() => {
@@ -203,7 +203,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
               />
             ) : (
               <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }} numberOfLines={1}>
-                {exercise.altActive ? exercise.altName : exercise.name}
+                {exercise?.altActive ? exercise.altName : exercise?.name}
               </Text>
             )}
             <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -218,7 +218,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                 />
               ) : (
                 <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
-                  {exercise.altActive ? exercise.altText1 : exercise.text1}
+                  {exercise?.altActive ? exercise.altText1 : exercise?.text1}
                 </Text>
               )}
               <View
@@ -227,7 +227,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                   backgroundColor: colors.border_grey,
                   height: 20,
                   marginHorizontal: 20,
-                  opacity: exercise.text2 || editing ? 1 : 0,
+                  opacity: exercise?.text2 || editing ? 1 : 0,
                 }}
               />
               {editing ? (
@@ -242,7 +242,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                   />
                 </>
               ) : (
-                exercise.text2 && (
+                exercise?.text2 && (
                   <>
                     <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
                       {exercise.altActive ? exercise.altText2 : exercise.text2}
@@ -255,7 +255,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
 
           <View
             style={{
-              opacity: !swiped && exercise.altActive === true && !editing ? 1 : 0,
+              opacity: !swiped && exercise?.altActive === true && !editing ? 1 : 0,
               borderWidth: 1,
               borderColor: colors.primary,
               borderRadius: 20,

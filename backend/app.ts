@@ -37,6 +37,7 @@ const run = async () => {
 
     console.log("Success!");
 
+    // Cron
     resetExercisesCron();
 
     app.listen(port, () => {
