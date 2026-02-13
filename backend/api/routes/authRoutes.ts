@@ -1,9 +1,10 @@
 import express, { Request, Response } from "express";
-import { postAccessToken, postGenerateOtp, postVerifyOTP } from "../controllers/authController.js";
+import { postAccessToken, postGenerateOtp, postSignOut, postVerifyOTP } from "../controllers/authController.js";
 import { body, ValidationChain } from "express-validator";
 import { validate } from "../middleware/validation.js";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
 import { JsonDto } from "../../../shared/jsondto.js";
+import { authenticate } from "../middleware/authentication.js";
 
 // Request Limits
 const authLimiter = rateLimit({
@@ -56,5 +57,6 @@ const baseUrl = "/auth";
 authRoutes.route(baseUrl + "/accessToken").post(authLimiter, accessTokenValidators, validate, postAccessToken);
 authRoutes.route(baseUrl + "/generateOtp").post(authLimiter, generateOtpValidators, validate, postGenerateOtp);
 authRoutes.route(baseUrl + "/verifyOtp").post(authLimiter, verifyOtpValidators, validate, postVerifyOTP);
+authRoutes.route(baseUrl + "/signOut").post(authenticate, authLimiter, accessTokenValidators, validate, postSignOut);
 
 export default authRoutes;

@@ -133,3 +133,34 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
     res.status(500).json({ error: "Server error" });
   }
 };
+
+export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<any>>) => {
+  try {
+    const users = await User.find({ email: req.user!.email });
+
+    if (users.length === 0) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    let matchedUser;
+
+    for (const user of users) {
+      const match = await bcrypt.compare(req.body.passkey, user.passkey);
+      if (match) {
+        matchedUser = user;
+        break;
+      }
+    }
+
+    if (!matchedUser) {
+      return res.status(403).json({ error: "Invalid passkey" });
+    }
+
+    await matchedUser.deleteOne();
+
+    res.status(200).json({});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
