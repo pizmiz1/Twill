@@ -1,4 +1,4 @@
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../constants/colors";
 import { useEffect, useState } from "react";
@@ -15,6 +15,7 @@ import { get } from "../helpers/fetch";
 import { errorAlert } from "../helpers/alert";
 import { MaterialIconButton } from "../components/shared/IconButton";
 import PageContainer from "../components/shared/pageContainer";
+import UserModal from "../components/daily/userModal";
 
 const DailyScreen = () => {
   const { modules, accessToken, updateAccessToken, updateModules } = useGlobalContext();
@@ -23,6 +24,8 @@ const DailyScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [todaysModules, setTodaysModules] = useState<ModuleDto[]>([]);
   const [loading, setLoading] = useState(modules.length === 0);
+  const [userModalVisible, setUserModalVisible] = useState(false);
+
   const date = new Date();
 
   const navigation = useNavigation();
@@ -86,7 +89,10 @@ const DailyScreen = () => {
     <PageContainer
       header={modules.length > 0 ? date.toLocaleDateString("en-US", { weekday: "long" }) : ""}
       setBlurActive={setBlurActive}
-      backButton={false}
+      userButton={true}
+      userButtonFunction={() => {
+        setUserModalVisible(true);
+      }}
     >
       <DetailsModal
         visible={modalVisible}
@@ -94,11 +100,12 @@ const DailyScreen = () => {
           setModalVisible(false);
         }}
       />
+      <UserModal visible={userModalVisible} setVisible={setUserModalVisible} />
 
       {modules.length > 0 ? (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View>
+            <View style={{ width: "75%" }}>
               <Text
                 style={{
                   color: "white",
@@ -134,63 +141,20 @@ const DailyScreen = () => {
             />
           </View>
           {todaysModules.length > 0 && (
-            <>
-              <Text
-                style={{
-                  color: "white",
-                  fontSize: 25,
-                  fontFamily: "Main-Font",
-                  marginTop: 20,
-                  marginBottom: 5,
-                }}
-              >
-                To-Do
-              </Text>
-              <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap" }}>
-                {todaysModules
-                  .filter((curr) => curr.progress !== 100)
-                  .map((module) => (
-                    <Module
-                      key={module.id}
-                      module={module}
-                      onPress={() => {
-                        // @ts-ignore
-                        navigation.navigate(routeNames.moduleDetail, { moduleId: module.id, prevRoute: routeNames.daily });
-                      }}
-                      progress={module.progress}
-                      dailyMod={true}
-                    />
-                  ))}
-              </View>
-
-              <Text
-                style={{
-                  color: "white",
-                  fontSize: 25,
-                  fontFamily: "Main-Font",
-                  marginTop: 40,
-                  marginBottom: 5,
-                }}
-              >
-                Finished
-              </Text>
-              <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap" }}>
-                {todaysModules
-                  .filter((curr) => curr.progress === 100)
-                  .map((module) => (
-                    <Module
-                      key={module.id}
-                      module={module}
-                      onPress={() => {
-                        // @ts-ignore
-                        navigation.navigate(routeNames.moduleDetail, { moduleId: module.id, prevRoute: routeNames.daily });
-                      }}
-                      progress={module.progress}
-                      dailyMod={true}
-                    />
-                  ))}
-              </View>
-            </>
+            <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap", marginTop: 20 }}>
+              {todaysModules.map((module) => (
+                <Module
+                  key={module.id}
+                  module={module}
+                  onPress={() => {
+                    // @ts-ignore
+                    navigation.navigate(routeNames.moduleDetail, { moduleId: module.id, prevRoute: routeNames.daily });
+                  }}
+                  progress={module.progress}
+                  dailyMod={true}
+                />
+              ))}
+            </View>
           )}
         </>
       ) : (

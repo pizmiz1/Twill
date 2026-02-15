@@ -34,6 +34,7 @@ const ModuleDetailScreen = () => {
   const [disableScroll, setDisableScroll] = useState(false);
   const [adding, setAdding] = useState(false);
   const [deleteTrigger, setDeleteTrigger] = useState(false);
+  const [exerciseActive, setExerciseActive] = useState(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
   const lottieAnimRef = useRef<LottieView>(null);
@@ -70,7 +71,7 @@ const ModuleDetailScreen = () => {
 
     if (firstRender.current) {
       moveAnim.setValue(indexToSet * 80);
-      doneAnim.setValue(finished ? 1 : 0);
+      doneAnim.setValue(finished || !exerciseActive ? 1 : 0);
       firstRender.current = false;
     } else {
       Animated.parallel([
@@ -81,7 +82,7 @@ const ModuleDetailScreen = () => {
           tension: 40,
         }),
         Animated.timing(doneAnim, {
-          toValue: finished ? 1 : 0,
+          toValue: finished || !exerciseActive ? 1 : 0,
           duration: 600,
           useNativeDriver: true,
         }),
@@ -90,8 +91,40 @@ const ModuleDetailScreen = () => {
   };
 
   useEffect(() => {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+
+    switch (today) {
+      case "Monday":
+        setExerciseActive(module.days.mon);
+        break;
+      case "Tuesday":
+        setExerciseActive(module.days.tues);
+        break;
+      case "Wednesday":
+        setExerciseActive(module.days.wed);
+        break;
+      case "Thursday":
+        setExerciseActive(module.days.thur);
+        break;
+      case "Friday":
+        setExerciseActive(module.days.fri);
+        break;
+      case "Saturday":
+        setExerciseActive(module.days.sat);
+        break;
+      case "Sunday":
+        setExerciseActive(module.days.sun);
+        break;
+      default:
+        break;
+    }
+
     setMarkerStates();
-  }, [module.exercises.length]);
+  }, [module.exercises.length, module]);
+
+  useEffect(() => {
+    setMarkerStates();
+  }, [exerciseActive]);
 
   const animateAll = (disable: boolean, refresh: boolean, finish: boolean) => {
     const animations: Animated.CompositeAnimation[] = [
@@ -349,20 +382,20 @@ const ModuleDetailScreen = () => {
       </View>
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 5, paddingTop: 10 }}>
         <TouchableOpacity
-          style={{ alignItems: "center", opacity: adding || module.progress === 0 ? 0 : 1 }}
+          style={{ alignItems: "center", opacity: adding || module.progress === 0 || !exerciseActive ? 0 : 1 }}
           onPress={() => {
             refreshOrFinish(true);
           }}
-          disabled={adding || module.progress === 0}
+          disabled={adding || module.progress === 0 || !exerciseActive}
         >
           <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Restart</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ alignItems: "center", opacity: adding || module.progress === 100 || module.exercises.length === 0 ? 0 : 1 }}
+          style={{ alignItems: "center", opacity: adding || module.progress === 100 || module.exercises.length === 0 || !exerciseActive ? 0 : 1 }}
           onPress={() => {
             refreshOrFinish(false);
           }}
-          disabled={adding || module.progress === 100 || module.exercises.length === 0}
+          disabled={adding || module.progress === 100 || module.exercises.length === 0 || !exerciseActive}
         >
           <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Finish</Text>
         </TouchableOpacity>
@@ -380,7 +413,7 @@ const ModuleDetailScreen = () => {
             circleOpacity={circleOpacities[index]}
             last={index === module.exercises.length - 1 && !adding}
             hideActive={doneAnim}
-            active={activeIndex === index}
+            active={activeIndex === index && exerciseActive}
             deleteCallback={(index: number) => {
               circleOpacities.splice(index, 1);
               viewOpacities.splice(index, 1);

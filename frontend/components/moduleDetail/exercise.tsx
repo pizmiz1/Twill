@@ -33,6 +33,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   const [swiped, setSwiped] = useState(false);
 
   const swipeableRef = useRef<Swipeable>(null);
+  const text1Ref = useRef<TextInput>(null);
 
   const deleteExercise = async () => {
     setSaving(true);
@@ -200,6 +201,13 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                 placeholder="Name..."
                 editable={!saving}
                 autoFocus={true}
+                returnKeyType="next"
+                submitBehavior={text1!.length === 0 ? "submit" : "blurAndSubmit"}
+                onSubmitEditing={() => {
+                  if (text1!.length === 0) {
+                    text1Ref.current?.focus();
+                  }
+                }}
               />
             ) : (
               <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }} numberOfLines={1}>
@@ -209,12 +217,16 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               {editing ? (
                 <TextInput
+                  ref={text1Ref}
                   value={text1}
                   onChangeText={setText1}
                   style={{ color: colors.lightest_grey, width: "40%" }}
                   placeholderTextColor="#6b6b6b"
                   placeholder="Text..."
                   editable={!saving}
+                  returnKeyType="go"
+                  onSubmitEditing={updateExercise}
+                  enablesReturnKeyAutomatically={true}
                 />
               ) : (
                 <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
@@ -239,6 +251,13 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                     placeholderTextColor="#6b6b6b"
                     placeholder="Optional..."
                     editable={!saving}
+                    returnKeyType="go"
+                    submitBehavior={text1?.length === 0 || name?.length === 0 ? "submit" : "blurAndSubmit"}
+                    onSubmitEditing={() => {
+                      if (text1!.length > 0 && name!.length > 0) {
+                        updateExercise();
+                      }
+                    }}
                   />
                 </>
               ) : (
@@ -271,7 +290,14 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             {saving ? (
               <ActivityIndicator size="small" color={colors.lightest_grey} />
             ) : (
-              <MaterialIconButton name="check" color={colors.primary} size={30} onPress={updateExercise} />
+              <MaterialIconButton
+                name="check"
+                color={colors.primary}
+                size={30}
+                onPress={updateExercise}
+                style={{ opacity: name?.length === 0 || text1?.length === 0 ? 0.4 : 1 }}
+                disabled={name?.length === 0 || text1?.length === 0}
+              />
             )}
           </View>
         )}

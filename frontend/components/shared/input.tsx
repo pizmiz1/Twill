@@ -13,9 +13,10 @@ interface InputProps {
   keyboardType?: KeyboardTypeOptions;
   disabled?: boolean;
   startVal?: string;
+  submit?: () => void;
 }
 
-const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset, limit, keyboardType, disabled, startVal }: InputProps) => {
+const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset, limit, keyboardType, disabled, startVal, submit }: InputProps) => {
   const [text, setText] = useState("");
 
   const animatedValue = useRef(new Animated.Value(0)).current;
@@ -88,6 +89,9 @@ const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset
           maxLength={limit}
           keyboardType={keyboardType}
           editable={!disabled}
+          submitBehavior="blurAndSubmit"
+          onSubmitEditing={submit}
+          returnKeyType={submit ? "go" : "default"}
         />
       </Animated.View>
     </View>

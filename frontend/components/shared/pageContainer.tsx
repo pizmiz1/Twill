@@ -25,6 +25,8 @@ interface PageContainerProps {
   scrollViewRef?: React.Ref<ScrollView>;
   keyboardPadding?: number;
   setCurrentY?: (y: number) => void;
+  userButton?: boolean;
+  userButtonFunction?: () => void;
 }
 
 const PageContainer = ({
@@ -40,6 +42,8 @@ const PageContainer = ({
   scrollViewRef,
   keyboardPadding,
   setCurrentY,
+  userButton,
+  userButtonFunction,
 }: PageContainerProps) => {
   const [blurActive, setBlurActiveLocal] = useState(false);
   const insets = useSafeAreaInsets();
@@ -61,6 +65,16 @@ const PageContainer = ({
       opacityLayoutEaseOut();
       setBlurActiveLocal(false);
       setBlurActive(false);
+    }
+  };
+
+  const headerButtonPress = () => {
+    if (backButton) {
+      navigation.navigate(backButtonRoute as never);
+    } else {
+      if (userButtonFunction) {
+        userButtonFunction();
+      }
     }
   };
 
@@ -99,17 +113,15 @@ const PageContainer = ({
         keyboardShouldPersistTaps="handled"
         ref={scrollViewRef}
       >
-        {backButton ? (
+        {backButton || userButton ? (
           <Animated.View style={{ height: 40 }}>
             <MaterialIconButton
-              name="arrow-back"
+              name={backButton ? "arrow-back" : "person"}
               size={34}
               color={colors.light_primary}
               style={{ paddingHorizontal: "5%", marginTop: "3%", ...backButtonStyle }}
               disabled={backButtonDisabled}
-              onPress={() => {
-                navigation.navigate(backButtonRoute as never);
-              }}
+              onPress={headerButtonPress}
             />
           </Animated.View>
         ) : (

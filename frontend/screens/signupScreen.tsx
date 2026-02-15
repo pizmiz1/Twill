@@ -36,6 +36,7 @@ const SignupScreen = () => {
     setResetEmailInput(!resetEmailInput);
     setVerifyingOtp(false);
     setOtp("");
+    setLoading(false);
   };
 
   const submit = async () => {
@@ -64,7 +65,6 @@ const SignupScreen = () => {
 
       if (response.error) {
         errorAlert(response.error);
-        resetState();
         return;
       }
 
@@ -81,7 +81,7 @@ const SignupScreen = () => {
 
       if (response.error) {
         errorAlert(response.error);
-        resetState();
+        setLoading(false);
         return;
       }
 
@@ -106,7 +106,7 @@ const SignupScreen = () => {
       setLoading(false);
       resetState();
 
-      navigation.navigate(routeNames.module);
+      navigation.navigate(routeNames.daily);
     }
   };
 
@@ -179,6 +179,7 @@ const SignupScreen = () => {
             }}
             focusColor="white"
             disabled={loading}
+            blurOnFilled={true}
           />
         ) : (
           <View style={{ width: "70%" }}>
@@ -191,6 +192,7 @@ const SignupScreen = () => {
               baseBorderColor={colors.primary}
               keyboardType="email-address"
               disabled={loading}
+              submit={submit}
             />
             {!emailValid && <Text style={{ marginTop: "1.5%", color: colors.warning }}>Please enter valid email.</Text>}
           </View>

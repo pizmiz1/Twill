@@ -3,7 +3,7 @@ import colors from "../../constants/colors";
 import { MaterialIconButton } from "../shared/IconButton";
 import { useGlobalContext } from "../../store/globalContext";
 import { ExerciseDto } from "../../../shared/moduledto";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Button from "../shared/button";
 
 interface AddExerciseProps {
@@ -19,6 +19,8 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
   const [text1, setText1] = useState("");
   const [text2, setText2] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const text1Ref = useRef<TextInput>(null);
 
   const savePress = async () => {
     setSaving(true);
@@ -76,15 +78,26 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
             placeholder="Name..."
             editable={!saving}
             autoFocus={true}
+            returnKeyType="next"
+            submitBehavior={text1.length === 0 ? "submit" : "blurAndSubmit"}
+            onSubmitEditing={() => {
+              if (text1.length === 0) {
+                text1Ref.current?.focus();
+              }
+            }}
           />
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TextInput
+              ref={text1Ref}
               value={text1}
               onChangeText={setText1}
               style={{ color: colors.lightest_grey, width: "40%" }}
               placeholderTextColor="#6b6b6b"
               placeholder="Text..."
               editable={!saving}
+              returnKeyType="go"
+              onSubmitEditing={savePress}
+              enablesReturnKeyAutomatically={true}
             />
             <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 20, marginHorizontal: 20 }} />
             <TextInput
@@ -94,6 +107,13 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
               placeholderTextColor="#6b6b6b"
               placeholder="Optional..."
               editable={!saving}
+              returnKeyType="go"
+              submitBehavior={text1.length === 0 || name.length === 0 ? "submit" : "blurAndSubmit"}
+              onSubmitEditing={() => {
+                if (text1.length > 0 && name.length > 0) {
+                  savePress();
+                }
+              }}
             />
           </View>
         </View>

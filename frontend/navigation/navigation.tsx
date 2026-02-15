@@ -13,12 +13,17 @@ const AppNav = () => {
   const Stack = createNativeStackNavigator({
     screenOptions: {
       headerShown: false,
-      gestureEnabled: false,
     },
     initialRouteName: routeNames.splash,
     screens: {
-      Splash: SplashScreen,
-      Signup: SignupScreen,
+      Splash: {
+        screen: SplashScreen,
+        options: { gestureEnabled: false },
+      },
+      Signup: {
+        screen: SignupScreen,
+        options: { animation: "fade", gestureEnabled: false },
+      },
       Daily: {
         screen: DailyScreen,
         options: ({ navigation }) => {
@@ -28,6 +33,7 @@ const AppNav = () => {
           return {
             animation:
               previousRoute?.name === routeNames.moduleDetail || previousRoute?.name === routeNames.module ? "slide_from_left" : "slide_from_right",
+            gestureEnabled: false,
           };
         },
       },
@@ -39,10 +45,14 @@ const AppNav = () => {
 
           return {
             animation: previousRoute?.name === routeNames.moduleDetail ? "slide_from_left" : "slide_from_right",
+            gestureEnabled: true,
           };
         },
       },
-      ModuleDetail: ModuleDetailScreen,
+      ModuleDetail: {
+        screen: ModuleDetailScreen,
+        options: { gestureEnabled: true },
+      },
     },
   });
 
