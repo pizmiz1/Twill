@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { postAccessToken, postGenerateOtp, postSignOut, postVerifyOTP } from "../controllers/authController.js";
+import { postAccessToken, postDeleteAccount, postGenerateOtp, postSignOut, postVerifyOTP } from "../controllers/authController.js";
 import { body, ValidationChain } from "express-validator";
 import { validate } from "../middleware/validation.js";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
@@ -58,5 +58,6 @@ authRoutes.route(baseUrl + "/accessToken").post(authLimiter, accessTokenValidato
 authRoutes.route(baseUrl + "/generateOtp").post(authLimiter, generateOtpValidators, validate, postGenerateOtp);
 authRoutes.route(baseUrl + "/verifyOtp").post(authLimiter, verifyOtpValidators, validate, postVerifyOTP);
 authRoutes.route(baseUrl + "/signOut").post(authenticate, authLimiter, accessTokenValidators, validate, postSignOut);
+authRoutes.route(baseUrl + "/deleteAccount").post(authenticate, authLimiter, accessTokenValidators, validate, postDeleteAccount);
 
 export default authRoutes;

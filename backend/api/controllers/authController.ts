@@ -169,3 +169,36 @@ export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response
     res.status(500).json({ error: "Server error" });
   }
 };
+
+export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<any>>) => {
+  try {
+    const users = await User.find({ email: req.user!.email });
+
+    if (users.length === 0) {
+      return res.status(401).json({ error: "User not found" });
+    }
+
+    let validUser;
+
+    for (const user of users) {
+      const match = await bcrypt.compare(req.body.passkey, user.passkey);
+      if (match) {
+        validUser = user;
+        break;
+      }
+    }
+
+    if (!validUser) {
+      return res.status(403).json({ error: "Invalid passkey" });
+    }
+
+    for (const user of users) {
+      await user.deleteOne();
+    }
+
+    res.status(200).json({});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
