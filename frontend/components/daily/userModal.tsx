@@ -9,7 +9,7 @@ import { JsonDto } from "../../../shared/jsondto";
 import { AccessDto } from "../../../shared/accessdto";
 import { post } from "../../helpers/fetch";
 import { useGlobalContext } from "../../store/globalContext";
-import { errorAlert } from "../../helpers/alert";
+import { deleteAlert, errorAlert } from "../../helpers/alert";
 import routeNames from "../../constants/routeNames";
 
 interface UserModalProps {
@@ -38,7 +38,7 @@ const UserModal = ({ visible, setVisible }: UserModalProps) => {
     setProcessing(false);
   };
 
-  const signOut = async () => {
+  const signOutOrDelete = async (signOut: boolean) => {
     setProcessing(true);
 
     const passkey = await SecureStore.getItemAsync(storageKeys.passkey);
@@ -48,7 +48,8 @@ const UserModal = ({ visible, setVisible }: UserModalProps) => {
       passkey: passkey!,
     };
 
-    const response: JsonDto<any> = await post("/auth/signOut", req, { accessToken: accessToken, updateAccessToken: updateAccessToken });
+    const url = signOut ? "/auth/signOut" : "/auth/deleteAccount";
+    const response: JsonDto<any> = await post(url, req, { accessToken: accessToken, updateAccessToken: updateAccessToken });
 
     if (response.error) {
       errorAlert(response.error);
@@ -72,7 +73,7 @@ const UserModal = ({ visible, setVisible }: UserModalProps) => {
       <View style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", flex: 1, justifyContent: "center", alignItems: "center" }}>
         <View
           style={{
-            height: 150,
+            height: 200,
             width: 250,
             backgroundColor: colors.dark_grey,
             borderRadius: 20,
@@ -91,16 +92,35 @@ const UserModal = ({ visible, setVisible }: UserModalProps) => {
             style={{ paddingVertical: 2, paddingHorizontal: "1%", alignSelf: "flex-end", opacity: processing ? 0.4 : 1 }}
           />
 
-          <View style={{ alignItems: "center", gap: 20, marginTop: 10 }}>
+          <View style={{ alignItems: "center", marginTop: 10 }}>
             <Text style={{ color: "white", fontSize: 15, fontWeight: "bold" }} numberOfLines={1}>
               {dispEmail}
             </Text>
             {processing ? (
-              <ActivityIndicator size="small" color={colors.lightest_grey} />
+              <ActivityIndicator size="small" color={colors.lightest_grey} style={{ marginTop: 30 }} />
             ) : (
-              <TouchableOpacity onPress={signOut}>
-                <Text style={{ color: colors.light_primary, fontSize: 18, fontWeight: "bold" }}>Sign Out</Text>
-              </TouchableOpacity>
+              <View style={{ marginTop: 30, alignItems: "center" }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    signOutOrDelete(true);
+                  }}
+                >
+                  <Text style={{ color: colors.light_primary, fontSize: 18, fontWeight: "bold" }}>Sign Out</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    deleteAlert(
+                      "Account",
+                      () => {
+                        signOutOrDelete(false);
+                      },
+                      "Are you sure you want to delete this account? You will lose all data tied to the account and this action cannot be undone.",
+                    );
+                  }}
+                >
+                  <Text style={{ color: colors.warning, fontSize: 18, fontWeight: "bold", marginTop: 15 }}>Delete Account</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         </View>

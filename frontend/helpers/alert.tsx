@@ -4,10 +4,10 @@ export const errorAlert = (message: string) => {
   Alert.alert("Error  :(", message, [{ text: "OK" }], { cancelable: false });
 };
 
-export const deleteAlert = (itemName: string, deleteItem: () => void) => {
+export const deleteAlert = (itemName: string, deleteItem: () => void, msg?: string) => {
   Alert.alert(
     "Delete " + itemName,
-    "Are you sure you want to delete this item? This action cannot be undone.", // Alert Message
+    msg ? msg : "Are you sure you want to delete this item? This action cannot be undone.", // Alert Message
     [
       {
         text: "Cancel",
@@ -23,6 +23,6 @@ export const deleteAlert = (itemName: string, deleteItem: () => void) => {
     ],
     {
       cancelable: true,
-    }
+    },
   );
 };
