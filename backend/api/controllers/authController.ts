@@ -10,6 +10,7 @@ import UserOtp from "../schema/userOtp.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import mailgun, { Options } from "nodemailer-mailgun-transport";
+import Module from "../schema/module.js";
 
 const mailgunAuth: Options = {
   auth: {
@@ -195,6 +196,8 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
     for (const user of users) {
       await user.deleteOne();
     }
+
+    await Module.deleteMany({ userEmail: req.user!.email });
 
     res.status(200).json({});
   } catch (err) {
