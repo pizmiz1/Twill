@@ -1,4 +1,4 @@
-import { Animated, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -10,6 +10,9 @@ import Exercise from "../components/moduleDetail/exercise";
 import LottieView from "lottie-react-native";
 import { opacityLayout, scaleYLayout } from "../helpers/layouts";
 import AddExercise from "../components/moduleDetail/addExercise";
+import { NestableDraggableFlatList, NestableScrollContainer } from "react-native-draggable-flatlist";
+import { ScrollView } from "react-native-gesture-handler";
+import ReorderExercise from "../components/moduleDetail/reorderExercise";
 
 const ModuleDetailScreen = () => {
   const route = useRoute();
@@ -34,6 +37,9 @@ const ModuleDetailScreen = () => {
   const [adding, setAdding] = useState(false);
   const [deleteTrigger, setDeleteTrigger] = useState(false);
   const [exerciseActive, setExerciseActive] = useState(false);
+  const [reordering, setReordering] = useState(false);
+  const [reorderExercises, setReorderExercises] = useState(module.exercises);
+  const [saving, setSaving] = useState(false);
 
   const activeIndex = useRef(0);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -45,7 +51,6 @@ const ModuleDetailScreen = () => {
   const borderAnim = useRef(new Animated.Value(1)).current;
   const viewOpacities = useRef(module.exercises.map((curr) => new Animated.Value(curr.completed ? 0.4 : 1))).current;
   const circleOpacities = useRef(module.exercises.map((curr) => new Animated.Value(curr.completed ? 1 : 0))).current;
-  const currentY = useRef(0);
   const moveScale = doneAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [1, 1, 4],
@@ -297,6 +302,26 @@ const ModuleDetailScreen = () => {
     }
   };
 
+  const cancelOrSave = async (save: boolean) => {
+    let success = true;
+
+    if (save) {
+      setSaving(true);
+
+      let newModule = module;
+      newModule.exercises = reorderExercises;
+
+      success = await patchModule(newModule);
+    }
+
+    if (success) {
+      setReordering(false);
+      setReorderExercises(module.exercises);
+    }
+
+    setSaving(false);
+  };
+
   return (
     <PageContainer
       header={module.name}
@@ -327,9 +352,6 @@ const ModuleDetailScreen = () => {
           />
         </Animated.View>
       }
-      setCurrentY={(y) => {
-        currentY.current = y;
-      }}
     >
       <DetailsModal
         module={module}
@@ -353,66 +375,112 @@ const ModuleDetailScreen = () => {
             fontStyle: "italic",
             fontWeight: "bold",
             opacity: blurActive ? 0 : 1,
-            width: "80%",
+            width: "78%",
           }}
           numberOfLines={1}
         >
           {module.name}
         </Text>
-        <MaterialIconButton
-          name="edit"
-          color={colors.light_primary}
-          size={34}
-          onPress={() => {
-            setEditing(true);
-            setModalVisible(true);
-          }}
-          disabled={editing}
-          style={{ opacity: blurActive ? 0 : editing ? 0.4 : 1, padding: "1%" }}
-        />
+        <View style={{ flexDirection: "row" }}>
+          <MaterialIconButton
+            name="swap-vert"
+            color={colors.light_primary}
+            size={34}
+            onPress={() => {
+              setReordering(true);
+            }}
+            disabled={editing || reordering || exerciseActive || adding}
+            style={{ opacity: blurActive || reordering || exerciseActive || adding ? 0 : editing ? 0.4 : 1, padding: "1%", marginRight: "5%" }}
+          />
+          <MaterialIconButton
+            name="edit"
+            color={colors.light_primary}
+            size={34}
+            onPress={() => {
+              setEditing(true);
+              setModalVisible(true);
+            }}
+            disabled={editing || reordering}
+            style={{ opacity: blurActive || reordering ? 0 : editing ? 0.4 : 1, padding: "1%" }}
+          />
+        </View>
       </View>
+
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 5, paddingTop: 10 }}>
-        <TouchableOpacity
-          style={{ alignItems: "center", opacity: adding || module.progress === 0 || !exerciseActive ? 0 : 1 }}
-          onPress={() => {
-            refreshOrFinish(true);
-          }}
-          disabled={adding || module.progress === 0 || !exerciseActive}
-        >
-          <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Restart</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{ alignItems: "center", opacity: adding || module.progress === 100 || module.exercises.length === 0 || !exerciseActive ? 0 : 1 }}
-          onPress={() => {
-            refreshOrFinish(false);
-          }}
-          disabled={adding || module.progress === 100 || module.exercises.length === 0 || !exerciseActive}
-        >
-          <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Finish</Text>
-        </TouchableOpacity>
+        {saving ? (
+          <>
+            <ActivityIndicator size="small" color={colors.lightest_grey} style={{ opacity: 0 }} />
+            <ActivityIndicator size="small" color={colors.lightest_grey} style={{ marginRight: "5%", marginBottom: "1%" }} />
+          </>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={{
+                alignItems: "center",
+                opacity: reordering || (!adding && !(module.progress === 0) && exerciseActive) ? 1 : 0,
+              }}
+              onPress={() => {
+                if (reordering) {
+                  cancelOrSave(false);
+                } else {
+                  refreshOrFinish(true);
+                }
+              }}
+              disabled={!(reordering || (!adding && !(module.progress === 0) && exerciseActive))}
+            >
+              <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>{reordering ? "Cancel" : "Restart"}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{
+                alignItems: "center",
+                opacity: reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive) ? 1 : 0,
+              }}
+              onPress={() => {
+                if (reordering) {
+                  cancelOrSave(true);
+                } else {
+                  refreshOrFinish(false);
+                }
+              }}
+              disabled={!(reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive))}
+            >
+              <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>{reordering ? "Save" : "Finish"}</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       <View style={{ borderBottomColor: colors.border_grey, borderBottomWidth: StyleSheet.hairlineWidth, width: "100%", marginTop: 5 }} />
 
       <View style={{ paddingHorizontal: "5%" }}>
-        {module.exercises.map((exercise, index) => (
-          <Exercise
-            key={exercise.id}
-            exerciseId={exercise.id!}
-            moduleId={module.id!}
-            viewOpacity={viewOpacities[index]}
-            circleOpacity={circleOpacities[index]}
-            last={index === module.exercises.length - 1 && !adding}
-            hideActive={doneAnim}
-            active={activeIndex.current === index && exerciseActive}
-            deleteCallback={(index: number) => {
-              circleOpacities.splice(index, 1);
-              viewOpacities.splice(index, 1);
-              scaleYLayout();
-              setDeleteTrigger(!deleteTrigger);
-            }}
+        {reordering ? (
+          <NestableDraggableFlatList
+            data={reorderExercises}
+            onDragEnd={({ data }) => setReorderExercises(data)}
+            keyExtractor={(item) => item.id!}
+            renderItem={(props) => <ReorderExercise item={props.item} drag={props.drag} isActive={props.isActive} saving={saving} />}
+            style={{ overflow: "visible" }}
           />
-        ))}
+        ) : (
+          module.exercises.map((exercise, index) => (
+            <Exercise
+              key={exercise.id}
+              exerciseId={exercise.id!}
+              moduleId={module.id!}
+              viewOpacity={viewOpacities[index]}
+              circleOpacity={circleOpacities[index]}
+              last={index === module.exercises.length - 1 && !adding}
+              hideActive={doneAnim}
+              active={activeIndex.current === index && exerciseActive}
+              deleteCallback={(index: number) => {
+                circleOpacities.splice(index, 1);
+                viewOpacities.splice(index, 1);
+                scaleYLayout();
+                setDeleteTrigger(!deleteTrigger);
+              }}
+            />
+          ))
+        )}
 
         {adding && (
           <>
@@ -422,8 +490,6 @@ const ModuleDetailScreen = () => {
             <AddExercise
               moduleId={module.id!}
               done={(add: boolean) => {
-                currentY.current = Math.max(0, currentY.current - 100);
-                scrollViewRef.current?.scrollTo({ y: currentY.current, animated: true });
                 if (add) {
                   circleOpacities.push(new Animated.Value(0));
                   viewOpacities.push(new Animated.Value(1));
@@ -437,14 +503,14 @@ const ModuleDetailScreen = () => {
         )}
 
         <TouchableOpacity
-          style={{ paddingHorizontal: 10, paddingVertical: 20, alignItems: "center", opacity: adding ? 0 : 1 }}
+          style={{ paddingHorizontal: 10, paddingVertical: 20, alignItems: "center", opacity: adding || reordering ? 0 : 1 }}
           onPress={() => {
             scrollViewRef.current?.scrollToEnd();
             opacityLayout();
             setAdding(true);
             animateAll(true, false, false);
           }}
-          disabled={adding}
+          disabled={adding || reordering}
         >
           <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Add Exercise</Text>
         </TouchableOpacity>
@@ -459,7 +525,7 @@ const ModuleDetailScreen = () => {
             transform: [{ translateY: moveAnim }, { scale: moveScale }],
           }}
         >
-          <TouchableOpacity onPress={completePress} disabled={activeIndex.current + 1 > module.exercises.length || adding}>
+          <TouchableOpacity onPress={completePress} disabled={activeIndex.current + 1 > module.exercises.length || adding || reordering}>
             <Animated.View
               style={{
                 width: 30,

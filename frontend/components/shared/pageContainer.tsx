@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Animated, Keyboard, KeyboardAvoidingView, ScrollView, ViewStyle } from "react-native";
+import { Animated, Keyboard, KeyboardAvoidingView, ViewStyle } from "react-native";
 import colors from "../../constants/colors";
 import React, { ReactElement, useEffect, useRef, useState } from "react";
 import { StyleSheet, View, Text, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
@@ -11,6 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { opacityLayoutEaseOut } from "../../helpers/layouts";
 import { MaterialIconButton } from "./IconButton";
 import { useNavigation } from "@react-navigation/native";
+import { NestableScrollContainer } from "react-native-draggable-flatlist";
+import { ScrollView } from "react-native-gesture-handler";
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -24,7 +26,6 @@ interface PageContainerProps {
   screenOverlay?: React.ReactNode;
   scrollViewRef?: React.Ref<ScrollView>;
   keyboardPadding?: number;
-  setCurrentY?: (y: number) => void;
   userButton?: boolean;
   userButtonFunction?: () => void;
 }
@@ -41,7 +42,6 @@ const PageContainer = ({
   screenOverlay,
   scrollViewRef,
   keyboardPadding,
-  setCurrentY,
   userButton,
   userButtonFunction,
 }: PageContainerProps) => {
@@ -99,13 +99,10 @@ const PageContainer = ({
           <Text style={{ fontSize: 17, fontWeight: "700", fontFamily: "Main-Font", color: "white", opacity: blurActive ? 1 : 0 }}>{header}</Text>
         </View>
       </View>
-      <ScrollView
+      <NestableScrollContainer
         scrollEventThrottle={16}
         onScroll={(e) => {
           handleScrollBlur(e, blurActive, setBlurActiveLocal);
-          if (setCurrentY) {
-            setCurrentY(e.nativeEvent.contentOffset.y);
-          }
         }}
         contentContainerStyle={{ flexGrow: 1 }}
         removeClippedSubviews={false}
@@ -131,7 +128,7 @@ const PageContainer = ({
           {children}
           <View style={{ padding: keyboardPadding ?? 0 }} />
         </View>
-      </ScrollView>
+      </NestableScrollContainer>
 
       {screenOverlay}
     </SafeAreaView>

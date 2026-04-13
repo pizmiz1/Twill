@@ -5,7 +5,6 @@ import { useGlobalContext } from "../../store/globalContext";
 import { useRef, useState } from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { opacityLayout } from "../../helpers/layouts";
-import { ExerciseDto } from "../../../shared/moduledto";
 import AltModal from "./altModal";
 
 interface ExerciseProps {
