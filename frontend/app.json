@@ -2,7 +2,7 @@
   "expo": {
     "name": "Regimotion",
     "slug": "Regimotion",
-    "version": "1.0",
+    "version": "2.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -17,12 +17,7 @@
     "android": {
       "edgeToEdgeEnabled": true
     },
-    "plugins": [
-      [
-        "expo-font"
-      ],
-      "expo-asset"
-    ],
+    "plugins": [["expo-font"], "expo-asset"],
     "extra": {
       "eas": {
         "projectId": "6b1f17ae-4a20-4f8a-b6e2-68a141d210d0"
