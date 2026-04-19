@@ -1,5 +1,4 @@
-import { UserDto } from "./userdto";
-
-export interface OtpDto extends UserDto {
-  otp: string;
+export interface OtpDto {
+  email: string;
+  otp?: string;
 }

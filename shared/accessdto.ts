@@ -1,5 +1,4 @@
-import { UserDto } from "./userdto";
-
-export interface AccessDto extends UserDto {
+export interface AccessDto {
+  email: string;
   passkey: string;
 }
