@@ -1,6 +1,6 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
-import { MaterialIconButton } from "../shared/IconButton";
+import { MaterialIconButton } from "../shared/iconButton";
 import { useGlobalContext } from "../../store/globalContext";
 import { useRef, useState } from "react";
 import { Swipeable } from "react-native-gesture-handler";

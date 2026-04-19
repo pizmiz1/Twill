@@ -56,7 +56,7 @@ const SignupScreen = () => {
 
       setLoading(true);
 
-      const body: UserDto = {
+      const body: OtpDto = {
         email: email,
       };
       const response: JsonDto<UserDto> = await post("/auth/generateOtp", body);

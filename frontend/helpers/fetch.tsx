@@ -7,8 +7,8 @@ import { errorAlert } from "./alert";
 import { AccessTokenType } from "../types/accessTokenType";
 import { ips } from "../constants/ips";
 
-const baseUrl = "https://twill.onrender.com";
-// const baseUrl = ips.Proxy;
+// const baseUrl = "https://twill.onrender.com";
+const baseUrl = ips.Proxy;
 
 const silentAccess = async (
   accessToken: string,

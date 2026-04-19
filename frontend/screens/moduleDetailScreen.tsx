@@ -2,7 +2,7 @@ import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View }
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { MaterialIconButton } from "../components/shared/IconButton";
+import { MaterialIconButton } from "../components/shared/iconButton";
 import PageContainer from "../components/shared/pageContainer";
 import DetailsModal from "../components/shared/detailsModal";
 import { useGlobalContext } from "../store/globalContext";
@@ -10,7 +10,7 @@ import Exercise from "../components/moduleDetail/exercise";
 import LottieView from "lottie-react-native";
 import { opacityLayout, scaleYLayout } from "../helpers/layouts";
 import AddExercise from "../components/moduleDetail/addExercise";
-import { NestableDraggableFlatList, NestableScrollContainer } from "react-native-draggable-flatlist";
+import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
 import { ScrollView } from "react-native-gesture-handler";
 import ReorderExercise from "../components/moduleDetail/reorderExercise";
 
@@ -19,7 +19,7 @@ const ModuleDetailScreen = () => {
   // @ts-ignore
   const { moduleId, prevRoute }: { moduleId: string; prevRoute: string } = route.params;
 
-  const { modules, patchModule } = useGlobalContext();
+  const { modules, patchModule, userSettings } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
 
   if (!module) {
@@ -51,6 +51,7 @@ const ModuleDetailScreen = () => {
   const borderAnim = useRef(new Animated.Value(1)).current;
   const viewOpacities = useRef(module.exercises.map((curr) => new Animated.Value(curr.completed ? 0.4 : 1))).current;
   const circleOpacities = useRef(module.exercises.map((curr) => new Animated.Value(curr.completed ? 1 : 0))).current;
+  const headerOpacity = useRef(new Animated.Value(0)).current;
   const moveScale = doneAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [1, 1, 4],
@@ -131,6 +132,14 @@ const ModuleDetailScreen = () => {
     setMarkerStates();
   }, [exerciseActive]);
 
+  useEffect(() => {
+    Animated.timing(headerOpacity, {
+      toValue: blurActive ? 0 : 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [blurActive]);
+
   const animateAll = (disable: boolean, refresh: boolean, finish: boolean) => {
     const animations: Animated.CompositeAnimation[] = [
       Animated.timing(borderAnim, {
@@ -205,7 +214,7 @@ const ModuleDetailScreen = () => {
       Animated.parallel(animations).start();
     }
 
-    if (finish) {
+    if (finish && userSettings.enableCompleteAnimation) {
       setDisableScroll(true);
       Animated.timing(lottieAnim, {
         toValue: 1,
@@ -254,7 +263,7 @@ const ModuleDetailScreen = () => {
     }
 
     Animated.parallel(animations, { stopTogether: false }).start(() => {
-      if (finished) {
+      if (finished && userSettings.enableCompleteAnimation) {
         setDisableScroll(true);
         Animated.timing(lottieAnim, {
           toValue: 1,
@@ -333,6 +342,7 @@ const ModuleDetailScreen = () => {
       disableScroll={disableScroll}
       scrollViewRef={scrollViewRef}
       keyboardPadding={200}
+      reordering={reordering}
       screenOverlay={
         <Animated.View style={{ ...StyleSheet.absoluteFillObject, position: "absolute", opacity: lottieAnim }}>
           <LottieView
@@ -367,20 +377,20 @@ const ModuleDetailScreen = () => {
       />
 
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Text
+        <Animated.Text
           style={{
             color: "white",
             fontSize: module.name.length < 10 ? 50 : 30,
             fontFamily: "Main-Font",
             fontStyle: "italic",
             fontWeight: "bold",
-            opacity: blurActive ? 0 : 1,
+            opacity: headerOpacity,
             width: "78%",
           }}
           numberOfLines={1}
         >
           {module.name}
-        </Text>
+        </Animated.Text>
         <View style={{ flexDirection: "row" }}>
           <MaterialIconButton
             name="swap-vert"

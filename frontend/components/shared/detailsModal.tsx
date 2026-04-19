@@ -12,7 +12,7 @@ import { ModuleDto } from "../../../shared/moduledto";
 import { deleteFetch, patch, post } from "../../helpers/fetch";
 import { deleteAlert, errorAlert } from "../../helpers/alert";
 import { JsonDto } from "../../../shared/jsondto";
-import { MaterialIconButton } from "./IconButton";
+import { MaterialIconButton } from "./iconButton";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../../constants/routeNames";
 

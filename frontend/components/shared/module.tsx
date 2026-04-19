@@ -132,19 +132,24 @@ const Module = ({ module, style, onPress, disabled = false, blank = false, progr
                 {module.name}
               </Text>
             </View>
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: module.color,
-                borderRadius: 20,
-                marginTop: 5,
-                backgroundColor: module.progress === 100 ? module.color : "",
-              }}
-            >
-              <Text style={{ color: "white", paddingHorizontal: 10, paddingVertical: 2 }}>
-                {module.exercises.filter((curr) => curr.completed === true).length}/{module.exercises.length}
-              </Text>
-            </View>
+            {module.progress === 100 ? (
+              <View style={{ backgroundColor: module.color, borderRadius: 100, padding: 5 }}>
+                <MaterialIcons name="check" size={20} color="white" />
+              </View>
+            ) : (
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: module.color,
+                  borderRadius: 20,
+                  marginTop: 5,
+                }}
+              >
+                <Text style={{ color: "white", paddingHorizontal: 10, paddingVertical: 2 }}>
+                  {module.exercises.filter((curr) => curr.completed === true).length}/{module.exercises.length}
+                </Text>
+              </View>
+            )}
           </View>
           <View style={{ flexGrow: 1, justifyContent: "center", width: "100%", paddingTop: "5%" }}>
             <Progress.Bar

@@ -1,7 +1,7 @@
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../constants/colors";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "../store/globalContext";
 import Module from "../components/shared/module";
 import { useNavigation } from "@react-navigation/native";
@@ -13,18 +13,19 @@ import { opacityLayout } from "../helpers/layouts";
 import { JsonDto } from "../../shared/jsondto";
 import { get } from "../helpers/fetch";
 import { errorAlert } from "../helpers/alert";
-import { MaterialIconButton } from "../components/shared/IconButton";
+import { MaterialIconButton } from "../components/shared/iconButton";
 import PageContainer from "../components/shared/pageContainer";
-import UserModal from "../components/daily/userModal";
+import { UserSettingsDto } from "../../shared/usersettingsdto";
 
 const DailyScreen = () => {
-  const { modules, accessToken, updateAccessToken, updateModules } = useGlobalContext();
+  const { modules, accessToken, updateAccessToken, updateModules, updateUserSettings } = useGlobalContext();
 
   const [blurActive, setBlurActive] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [todaysModules, setTodaysModules] = useState<ModuleDto[]>([]);
   const [loading, setLoading] = useState(modules.length === 0);
-  const [userModalVisible, setUserModalVisible] = useState(false);
+
+  const headerOpacity = useRef(new Animated.Value(0)).current;
 
   const date = new Date();
 
@@ -38,7 +39,17 @@ const DailyScreen = () => {
         return;
       }
 
+      const responseUserSettings: JsonDto<UserSettingsDto> = await get("/userSettings", {
+        accessToken: accessToken,
+        updateAccessToken: updateAccessToken,
+      });
+      if (responseUserSettings.error) {
+        errorAlert(responseUserSettings.error);
+        return;
+      }
+
       updateModules(responseModule.data!);
+      updateUserSettings(responseUserSettings.data!);
       opacityLayout();
       setLoading(false);
     };
@@ -78,6 +89,14 @@ const DailyScreen = () => {
     }
   }, [modules]);
 
+  useEffect(() => {
+    Animated.timing(headerOpacity, {
+      toValue: blurActive ? 0 : 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [blurActive]);
+
   if (loading)
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.secondary }}>
@@ -90,9 +109,6 @@ const DailyScreen = () => {
       header={modules.length > 0 ? date.toLocaleDateString("en-US", { weekday: "long" }) : ""}
       setBlurActive={setBlurActive}
       userButton={true}
-      userButtonFunction={() => {
-        setUserModalVisible(true);
-      }}
     >
       <DetailsModal
         visible={modalVisible}
@@ -100,34 +116,32 @@ const DailyScreen = () => {
           setModalVisible(false);
         }}
       />
-      <UserModal visible={userModalVisible} setVisible={setUserModalVisible} />
-
       {modules.length > 0 ? (
         <>
           <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
             <View style={{ width: "75%" }}>
-              <Text
+              <Animated.Text
                 style={{
                   color: "white",
-                  fontSize: 40,
+                  fontSize: 50,
                   fontFamily: "Main-Font",
                   fontStyle: "italic",
                   fontWeight: "bold",
-                  opacity: blurActive ? 0 : 1,
+                  opacity: headerOpacity,
                 }}
               >
                 {date.toLocaleDateString("en-US", { weekday: "long" })}
-              </Text>
-              <Text
+              </Animated.Text>
+              <Animated.Text
                 style={{
                   color: colors.lighter_grey,
                   fontSize: 20,
                   fontFamily: "Main-Font",
-                  opacity: blurActive ? 0 : 1,
+                  opacity: headerOpacity,
                 }}
               >
                 {date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-              </Text>
+              </Animated.Text>
             </View>
 
             <MaterialIconButton

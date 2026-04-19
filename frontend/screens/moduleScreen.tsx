@@ -1,12 +1,12 @@
-import { Text, View } from "react-native";
+import { Animated, Text, View } from "react-native";
 import Module from "../components/shared/module";
 import colors from "../constants/colors";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "../store/globalContext";
 import DetailsModal from "../components/shared/detailsModal";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
-import { MaterialIconButton } from "../components/shared/IconButton";
+import { MaterialIconButton } from "../components/shared/iconButton";
 import PageContainer from "../components/shared/pageContainer";
 
 const ModuleScreen = () => {
@@ -15,7 +15,17 @@ const ModuleScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [blurActive, setBlurActive] = useState(false);
 
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+
   const navigation = useNavigation();
+
+  useEffect(() => {
+    Animated.timing(headerOpacity, {
+      toValue: blurActive ? 0 : 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [blurActive]);
 
   return (
     <PageContainer header="Modules" setBlurActive={setBlurActive} backButton={true} backButtonRoute={routeNames.daily}>
@@ -29,19 +39,19 @@ const ModuleScreen = () => {
         }}
       />
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: "0%" }}>
-        <Text
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Animated.Text
           style={{
             color: "white",
             fontSize: 50,
             fontFamily: "Main-Font",
             fontStyle: "italic",
             fontWeight: "bold",
-            opacity: blurActive ? 0 : 1,
+            opacity: headerOpacity,
           }}
         >
           Modules
-        </Text>
+        </Animated.Text>
         <MaterialIconButton
           name="add"
           size={34}

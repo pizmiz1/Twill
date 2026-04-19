@@ -1,6 +1,6 @@
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { ComponentProps } from "react";
-import { TouchableOpacity, ViewStyle } from "react-native";
+import { Animated, TouchableOpacity, ViewStyle } from "react-native";
 
 interface MaterialIconButtonProps {
   name: ComponentProps<typeof MaterialIcons>["name"];

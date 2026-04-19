@@ -8,6 +8,7 @@ import SignupScreen from "../screens/signupScreen";
 import ModuleScreen from "../screens/moduleScreen";
 import DailyScreen from "../screens/dailyScreen";
 import ModuleDetailScreen from "../screens/moduleDetailScreen";
+import AccountScreen from "../screens/accountScreen";
 
 const AppNav = () => {
   const Stack = createNativeStackNavigator({
@@ -32,10 +33,18 @@ const AppNav = () => {
 
           return {
             animation:
-              previousRoute?.name === routeNames.moduleDetail || previousRoute?.name === routeNames.module ? "slide_from_left" : "slide_from_right",
+              previousRoute?.name === routeNames.moduleDetail ||
+              previousRoute?.name === routeNames.module ||
+              previousRoute?.name === routeNames.account
+                ? "slide_from_left"
+                : "slide_from_right",
             gestureEnabled: false,
           };
         },
+      },
+      Account: {
+        screen: AccountScreen,
+        options: { gestureEnabled: true },
       },
       Module: {
         screen: ModuleScreen,

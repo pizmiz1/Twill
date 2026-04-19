@@ -9,10 +9,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { opacityLayoutEaseOut } from "../../helpers/layouts";
-import { MaterialIconButton } from "./IconButton";
+import { MaterialIconButton } from "./iconButton";
 import { useNavigation } from "@react-navigation/native";
 import { NestableScrollContainer } from "react-native-draggable-flatlist";
 import { ScrollView } from "react-native-gesture-handler";
+import routeNames from "../../constants/routeNames";
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ interface PageContainerProps {
   scrollViewRef?: React.Ref<ScrollView>;
   keyboardPadding?: number;
   userButton?: boolean;
-  userButtonFunction?: () => void;
+  reordering?: boolean;
 }
 
 const PageContainer = ({
@@ -43,12 +44,31 @@ const PageContainer = ({
   scrollViewRef,
   keyboardPadding,
   userButton,
-  userButtonFunction,
+  reordering,
 }: PageContainerProps) => {
   const [blurActive, setBlurActiveLocal] = useState(false);
+
+  const headerOpacity = useRef(new Animated.Value(0)).current;
+  const buttonOpacity = useRef(new Animated.Value(0)).current;
+
   const insets = useSafeAreaInsets();
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerOpacity, {
+        toValue: blurActive ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonOpacity, {
+        toValue: blurActive ? 0 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [blurActive]);
 
   const HEADER_HEIGHT = 65 + insets.top;
 
@@ -71,12 +91,12 @@ const PageContainer = ({
   const headerButtonPress = () => {
     if (backButton) {
       navigation.navigate(backButtonRoute as never);
-    } else {
-      if (userButtonFunction) {
-        userButtonFunction();
-      }
+    } else if (userButton) {
+      navigation.navigate(routeNames.account as never);
     }
   };
+
+  const RootScrollView = reordering ? NestableScrollContainer : ScrollView;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.secondary }} edges={["top", "left", "right"]}>
@@ -96,10 +116,12 @@ const PageContainer = ({
         </MaskedView>
 
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Text style={{ fontSize: 17, fontWeight: "700", fontFamily: "Main-Font", color: "white", opacity: blurActive ? 1 : 0 }}>{header}</Text>
+          <Animated.Text style={{ opacity: headerOpacity, fontSize: 17, fontWeight: "700", fontFamily: "Main-Font", color: "white" }}>
+            {header}
+          </Animated.Text>
         </View>
       </View>
-      <NestableScrollContainer
+      <RootScrollView
         scrollEventThrottle={16}
         onScroll={(e) => {
           handleScrollBlur(e, blurActive, setBlurActiveLocal);
@@ -111,7 +133,7 @@ const PageContainer = ({
         ref={scrollViewRef}
       >
         {backButton || userButton ? (
-          <Animated.View style={{ height: 40 }}>
+          <Animated.View style={{ height: 40, opacity: buttonOpacity }}>
             <MaterialIconButton
               name={backButton ? "arrow-back" : "person"}
               size={34}
@@ -124,11 +146,11 @@ const PageContainer = ({
         ) : (
           <View style={{ height: 40 }} />
         )}
-        <View style={{ padding: "5%" }}>
+        <View style={{ padding: "5%", flex: 1 }}>
           {children}
           <View style={{ padding: keyboardPadding ?? 0 }} />
         </View>
-      </NestableScrollContainer>
+      </RootScrollView>
 
       {screenOverlay}
     </SafeAreaView>
