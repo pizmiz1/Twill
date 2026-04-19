@@ -7,6 +7,7 @@ import cors from "cors";
 import moduleRoutes from "./api/routes/moduleRoutes.js";
 import { JsonDto } from "../shared/jsondto.js";
 import { resetExercisesCron } from "./api/cron/resetExercises.js";
+import userSettingsRoutes from "./api/routes/userSettingsRoutes.js";
 
 console.log("Starting Server");
 
@@ -24,6 +25,7 @@ app.use(requestLogger);
 // Routes
 app.use("/", authRoutes);
 app.use("/", moduleRoutes);
+app.use("/", userSettingsRoutes);
 app.get("/", (req, res: Response<JsonDto<string>>) => {
   res.status(200).json({ data: "Regimotion server is healthy." });
 });

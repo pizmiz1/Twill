@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
-import { OtpDto } from "../../../shared/otpdto.js";
 
-interface OtpDtoBackend extends OtpDto {
+interface OtpDtoBackend {
+  email: string;
+  otp: string;
   createdAt: Date;
 }
 

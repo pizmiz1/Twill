@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { JsonDto } from "../../../shared/jsondto.js";
 import nodemailer from "nodemailer";
-import { UserDto } from "../../../shared/userdto.js";
 import { OtpDto } from "../../../shared/otpdto.js";
 import { AccessDto } from "../../../shared/accessdto.js";
 import User from "../schema/user.js";
@@ -11,6 +10,8 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import mailgun, { Options } from "nodemailer-mailgun-transport";
 import Module from "../schema/module.js";
+import UserSettings from "../schema/userSettings.js";
+import mongoose from "mongoose";
 
 const mailgunAuth: Options = {
   auth: {
@@ -51,13 +52,11 @@ export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Resp
   }
 };
 
-export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Response<JsonDto<{}>>) => {
+export const postGenerateOtp = async (req: Request<{}, {}, OtpDto>, res: Response<JsonDto<{}>>) => {
+  const session = await mongoose.startSession();
+
   try {
     const existing = await UserOtp.findOne({ email: req.body.email });
-
-    if (existing) {
-      await UserOtp.findByIdAndDelete(existing._id);
-    }
 
     let otpCode;
     if (req.body.email === "test@test.com") {
@@ -71,36 +70,55 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
 
     const userOtp = new UserOtp({ email: req.body.email, otp: hashedOtp });
 
-    await userOtp.save();
-
     const mailOptions = {
       from: process.env.FROM_EMAIL,
       to: req.body.email,
       subject: "Regimotion OTP Code!",
       html: `
-              <div style="max-width: 600px; margin: 20px auto; padding: 20px; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9;">
-                <h2>Email Verification</h2>
-                <p>Hello,</p>
-                <p>Use the following One-Time Password (OTP) to complete your verification process. For your security, this code is valid for 5 minutes only.</p>
-                <span style="font-size: 32px; font-weight: bold; color: #234452; text-align: center; padding: 15px 0; letter-spacing: 5px; background-color: #ffffff; border: 1px solid #eee; border-radius: 4px; display: block; width: fit-content; margin: 15px auto;">
+              <div style="max-width: 600px; margin: 20px auto; padding: 20px; font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 8px; background-color: #f9f9f9; text-align: center;"> 
+                <h2 style="margin-top: 0; color: #333;">Verification Code</h2>
+                
+                <!-- Code shown first -->
+                <div style="font-size: 36px; font-weight: bold; color: #234452; padding: 20px; letter-spacing: 8px; background-color: #ffffff; border: 2px dashed #cbd5e0; border-radius: 8px; display: inline-block; margin: 10px auto 25px auto;"> 
                   ${otpCode} 
-                </span>
-                <p>If you did not request sthis code, please ignore this email.</p>
+                </div>
+
+                <!-- Supporting text follows -->
+                <div style="text-align: left; color: #555; line-height: 1.6;">
+                  <p><strong>Hello,</strong></p> 
+                  <p>Please use the One-Time Password (OTP) above to complete your verification. For your security, this code is valid for <strong>5 minutes</strong> only.</p> 
+                  <p style="font-size: 13px; color: #888; margin-top: 20px;">If you did not request this code, please ignore this email.</p> 
+                </div>
               </div>
             `,
     };
 
     await transporter.sendMail(mailOptions);
 
+    await session.withTransaction(async () => {
+      if (existing) {
+        await UserOtp.findByIdAndDelete(existing._id, { session });
+      }
+      await userOtp.save({ session });
+    });
+
     res.status(200).json({});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
   }
 };
 
 export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<JsonDto<AccessDto>>) => {
+  const session = await mongoose.startSession();
+
   try {
+    if (!req.body.otp) {
+      return res.status(400).json({ error: "Otp not provided" });
+    }
+
     const userOtp = await UserOtp.findOne({ email: req.body.email });
 
     if (!userOtp) {
@@ -112,8 +130,6 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
     if (!isMatch) {
       return res.status(403).json({ error: "Invalid otp" });
     }
-
-    await UserOtp.findByIdAndDelete(userOtp._id);
 
     const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
     let passkey = "";
@@ -128,8 +144,13 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
     const hasedPasskey = await bcrypt.hash(passkey, saltRounds);
 
     const newUser = new User({ email: req.body.email, passkey: hasedPasskey });
+    const newUserSettings = new UserSettings({ userEmail: req.body.email, enableCompleteAnimation: true });
 
-    await newUser.save();
+    await session.withTransaction(async () => {
+      await UserOtp.findByIdAndDelete(userOtp._id, { session });
+      await newUser.save({ session });
+      await newUserSettings.save({ session });
+    });
 
     const accessDto: AccessDto = { email: req.body.email, passkey: passkey };
 
@@ -137,6 +158,8 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -172,6 +195,8 @@ export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response
 };
 
 export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<any>>) => {
+  const session = await mongoose.startSession();
+
   try {
     const users = await User.find({ email: req.user!.email });
 
@@ -193,15 +218,19 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
       return res.status(403).json({ error: "Invalid passkey" });
     }
 
-    for (const user of users) {
-      await user.deleteOne();
-    }
-
-    await Module.deleteMany({ userEmail: req.user!.email });
+    await session.withTransaction(async () => {
+      for (const user of users) {
+        await user.deleteOne({ session });
+      }
+      await Module.deleteMany({ userEmail: req.user!.email }, { session });
+      await UserSettings.deleteOne({ userEmail: req.user!.email }, { session });
+    });
 
     res.status(200).json({});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
   }
 };
