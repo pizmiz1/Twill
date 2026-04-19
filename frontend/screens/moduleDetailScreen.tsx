@@ -52,6 +52,9 @@ const ModuleDetailScreen = () => {
   const viewOpacities = useRef(module.exercises.map((curr) => new Animated.Value(curr.completed ? 0.4 : 1))).current;
   const circleOpacities = useRef(module.exercises.map((curr) => new Animated.Value(curr.completed ? 1 : 0))).current;
   const headerOpacity = useRef(new Animated.Value(0)).current;
+  const reorderHideOpacity = useRef(new Animated.Value(0)).current;
+  const restartCancelButtonOpacity = useRef(new Animated.Value(0)).current;
+  const finishSaveButtonOpacity = useRef(new Animated.Value(0)).current;
   const moveScale = doneAnim.interpolate({
     inputRange: [0, 0.5, 1],
     outputRange: [1, 1, 4],
@@ -139,6 +142,26 @@ const ModuleDetailScreen = () => {
       useNativeDriver: true,
     }).start();
   }, [blurActive]);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(reorderHideOpacity, {
+        toValue: reordering ? 0 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(restartCancelButtonOpacity, {
+        toValue: reordering || (!adding && !(module.progress === 0) && exerciseActive) ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(finishSaveButtonOpacity, {
+        toValue: reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive) ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [reordering, adding, module, exerciseActive]);
 
   const animateAll = (disable: boolean, refresh: boolean, finish: boolean) => {
     const animations: Animated.CompositeAnimation[] = [
@@ -391,7 +414,7 @@ const ModuleDetailScreen = () => {
         >
           {module.name}
         </Animated.Text>
-        <View style={{ flexDirection: "row" }}>
+        <Animated.View style={{ flexDirection: "row", opacity: reorderHideOpacity }}>
           <MaterialIconButton
             name="swap-vert"
             color={colors.light_primary}
@@ -400,7 +423,7 @@ const ModuleDetailScreen = () => {
               setReordering(true);
             }}
             disabled={editing || reordering || exerciseActive || adding}
-            style={{ opacity: blurActive || reordering || exerciseActive || adding ? 0 : editing ? 0.4 : 1, padding: "1%", marginRight: "5%" }}
+            style={{ opacity: blurActive || exerciseActive || adding ? 0 : editing ? 0.4 : 1, padding: "1%", marginRight: "5%" }}
           />
           <MaterialIconButton
             name="edit"
@@ -411,9 +434,9 @@ const ModuleDetailScreen = () => {
               setModalVisible(true);
             }}
             disabled={editing || reordering}
-            style={{ opacity: blurActive || reordering ? 0 : editing ? 0.4 : 1, padding: "1%" }}
+            style={{ opacity: blurActive ? 0 : editing ? 0.4 : 1, padding: "1%" }}
           />
-        </View>
+        </Animated.View>
       </View>
 
       <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 5, paddingTop: 10 }}>
@@ -427,7 +450,6 @@ const ModuleDetailScreen = () => {
             <TouchableOpacity
               style={{
                 alignItems: "center",
-                opacity: reordering || (!adding && !(module.progress === 0) && exerciseActive) ? 1 : 0,
               }}
               onPress={() => {
                 if (reordering) {
@@ -438,12 +460,13 @@ const ModuleDetailScreen = () => {
               }}
               disabled={!(reordering || (!adding && !(module.progress === 0) && exerciseActive))}
             >
-              <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>{reordering ? "Cancel" : "Restart"}</Text>
+              <Animated.Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20, opacity: restartCancelButtonOpacity }}>
+                {reordering ? "Cancel" : "Restart"}
+              </Animated.Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={{
                 alignItems: "center",
-                opacity: reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive) ? 1 : 0,
               }}
               onPress={() => {
                 if (reordering) {
@@ -454,7 +477,9 @@ const ModuleDetailScreen = () => {
               }}
               disabled={!(reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive))}
             >
-              <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>{reordering ? "Save" : "Finish"}</Text>
+              <Animated.Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20, opacity: finishSaveButtonOpacity }}>
+                {reordering ? "Save" : "Finish"}
+              </Animated.Text>
             </TouchableOpacity>
           </>
         )}
